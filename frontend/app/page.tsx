@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import axios from "axios";
 import { Question } from "./types";
 import { SAMPLE_QUESTIONS } from "./data/sampleQuestions";
 import Header from "./components/Header";
@@ -16,10 +17,16 @@ export default function Home() {
   const [results, setResults] = useState<Question[]>([]);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [comingSoonFeature, setComingSoonFeature] = useState<"lists" | "roadmaps" | null>(null);
-  const [hoveredQuestionId, setHoveredQuestionId] = useState<number | null>(null);
 
-  const handleSearch = () => {
-    setResults(SAMPLE_QUESTIONS);
+  const handleSearch = async () => {
+    try {
+      const response = await axios.get<Question[]>('/api/py/search');
+      setResults(response.data);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      // Fallback to sample questions if API fails
+      setResults(SAMPLE_QUESTIONS);
+    }
   };
 
   const handleBackToHome = () => {
@@ -59,8 +66,6 @@ export default function Home() {
               />
               <ResultsList
                 results={results}
-                hoveredQuestionId={hoveredQuestionId}
-                onQuestionHover={setHoveredQuestionId}
               />
             </div>
           </div>

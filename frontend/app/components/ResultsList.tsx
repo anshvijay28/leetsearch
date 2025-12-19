@@ -5,14 +5,10 @@ import QuestionCard from "./QuestionCard";
 
 type ResultsListProps = {
   results: Question[];
-  hoveredQuestionId: number | null;
-  onQuestionHover: (id: number | null) => void;
 };
 
 export default function ResultsList({
   results,
-  hoveredQuestionId,
-  onQuestionHover,
 }: ResultsListProps) {
   if (results.length === 0) {
     return null;
@@ -35,9 +31,6 @@ export default function ResultsList({
           <QuestionCard
             key={q.id}
             question={q}
-            isHovered={hoveredQuestionId === q.id}
-            onMouseEnter={() => onQuestionHover(q.id)}
-            onMouseLeave={() => onQuestionHover(null)}
           />
         ))}
       </div>
