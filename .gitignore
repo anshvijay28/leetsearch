@@ -9,6 +9,8 @@ backend/venv/
 backend/env/
 backend/ENV/
 
+frontend/.env.local.bak
+
 # Python cache files
 __pycache__/
 *.py[cod]

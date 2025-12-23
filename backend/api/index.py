@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pydantic model for Question
+# Pydantic model for Question (MongoDB search results)
 class Question(BaseModel):
     id: int
     qid: int
@@ -24,16 +24,6 @@ class Question(BaseModel):
     difficulty: str
     tags: List[str]
 
-@app.get("/api/py/test-db-connection")
-async def test_db_connection():
-    """
-    Test the database connection.
-    """
-    try:
-        collection = await get_collection()
-        return {"message": "Database connection successful"}
-    except Exception as e:
-        return {"message": f"Database connection failed: {e}"}
 
 @app.get("/api/py/search", response_model=List[Question])
 async def search_questions(query: Optional[str] = None):
