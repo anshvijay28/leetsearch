@@ -228,13 +228,34 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isUpdating || availabilityCheck.checking || username === user?.username}
-              className="w-full inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#06b6d4] via-[#3b82f6] to-[#6366f1] px-3 py-2.5 text-sm font-medium text-white shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isUpdating ? "Updating..." : "Update Username"}
-            </button>
+            <div className="flex gap-3">
+              <Link href="/" className="flex-1">
+                <button
+                  type="button"
+                  className="w-full inline-flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-[#27272f] px-3 py-2.5 text-sm font-medium text-zinc-200 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </Link>
+              <button
+                type="submit"
+                disabled={isUpdating || availabilityCheck.checking || username === user?.username || availabilityCheck.available !== true}
+                className="flex-1 inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#06b6d4] via-[#3b82f6] to-[#6366f1] px-3 py-2.5 text-sm font-medium text-white shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? "Saving..." : availabilityCheck.available === true ? "Save" : "Update Username"}
+              </button>
+            </div>
+
+            {success && (
+              <Link href="/">
+                <button
+                  type="button"
+                  className="w-full inline-flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-[#27272f] px-3 py-2.5 text-sm font-medium text-zinc-200 transition-colors cursor-pointer"
+                >
+                  Go Home
+                </button>
+              </Link>
+            )}
           </form>
         </div>
       </div>
