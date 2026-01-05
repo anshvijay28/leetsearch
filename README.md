@@ -1,0 +1,1 @@
+Rag application that allows users to search for the exact type of leetcode question they require to solidify understanding of any pattern. The database powering this application can be found [here](https://github.com/anshvijay28/leetcode_database).
