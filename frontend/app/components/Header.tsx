@@ -8,10 +8,9 @@ import LoginRequiredModal from "./LoginRequiredModal";
 
 type HeaderProps = {
   onListsClick?: () => void;
-  onRoadmapsClick: () => void;
 };
 
-export default function Header({ onListsClick, onRoadmapsClick }: HeaderProps) {
+export default function Header({ onListsClick }: HeaderProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -67,12 +66,6 @@ export default function Header({ onListsClick, onRoadmapsClick }: HeaderProps) {
                 {pathname === "/lists" && (
                   <span className="absolute -bottom-1 left-0 h-[2px] w-full bg-gradient-to-r from-[#06b6d4] via-[#3b82f6] to-transparent" />
                 )}
-              </button>
-              <button
-                onClick={onRoadmapsClick}
-                className="text-zinc-400 hover:text-[#06b6d4] transition-colors"
-              >
-                My Roadmaps
               </button>
               {isAuthenticated && (
                 <Link

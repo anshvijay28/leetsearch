@@ -107,16 +107,10 @@ export default function Home() {
     setShowComingSoon(true);
   };
 
-  const handleRoadmapsClick = () => {
-    setComingSoonFeature("roadmaps");
-    setShowComingSoon(true);
-  };
-
   return (
     <div className="min-h-screen text-white flex flex-col">
       <Header
         onListsClick={handleListsClick}
-        onRoadmapsClick={handleRoadmapsClick}
       />
 
       {!hasStartedSearching ? (
