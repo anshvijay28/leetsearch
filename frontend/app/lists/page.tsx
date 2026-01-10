@@ -2,27 +2,32 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import Header from "../components/Header";
 import CreateListModal from "../components/CreateListModal";
 import ListDetailView from "../components/ListDetailView";
-
-type List = {
-  id: string;
-  name: string;
-  description?: string;
-  problem_count: number;
-};
+import { useLists, type List } from "../hooks/useLists";
 
 export default function ListsPage() {
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
-  const [lists, setLists] = useState<List[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedList, setSelectedList] = useState<List | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
+
+  // ============================================
+  // React Query hook - replaces useState + useEffect + axios
+  // ============================================
+  const {
+    lists,
+    isLoading,
+    error: listsError,
+    createList,
+    deleteList,
+  } = useLists();
+
+  // Combined error from query or mutations
+  const error = listsError || mutationError;
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -31,111 +36,57 @@ export default function ListsPage() {
     }
   }, [isAuthenticated, loading, router]);
 
-  // Fetch lists from backend
-  useEffect(() => {
-    if (isAuthenticated && !loading) {
-      fetchLists();
-    }
-  }, [isAuthenticated, loading]);
-
-  const fetchLists = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await axios.get<List[]>('/api/py/lists');
-      setLists(response.data);
-    } catch (err) {
-      console.error('Failed to fetch lists:', err);
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        setError("Please log in to view your lists");
-      } else {
-        setError("Failed to load lists. Please try again.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleListClick = (list: List) => {
     setSelectedList(list);
   };
 
+  // ============================================
+  // DELETE: Now uses React Query mutation
+  // ============================================
   const handleDeleteList = async () => {
     if (!selectedList) return;
-
-    setIsLoading(true);
-    setError(null);
+    setMutationError(null);
 
     try {
-      await axios.delete(`/api/py/lists/${selectedList.id}`);
-
-      // Remove list from state (optimistic update)
-      const updatedLists = lists.filter((list) => list.id !== selectedList.id);
-      setLists(updatedLists);
+      await deleteList(selectedList.id);
       
-      // Select first list if available, otherwise clear selection
-      if (updatedLists.length > 0) {
-        setSelectedList(updatedLists[0]);
+      // React Query will refetch lists automatically (via invalidateQueries)
+      // We just need to update the selection
+      const remainingLists = lists.filter((list) => list.id !== selectedList.id);
+      if (remainingLists.length > 0) {
+        setSelectedList(remainingLists[0]);
       } else {
         setSelectedList(null);
       }
     } catch (err) {
       console.error("Failed to delete list:", err);
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          setError("Please log in to delete a list");
-        } else if (err.response?.status === 404) {
-          setError("List not found or you don't have permission to delete it");
-        } else {
-          setError("Failed to delete list. Please try again.");
-        }
-      } else {
-        setError("Failed to delete list. Please try again.");
-      }
-    } finally {
-      setIsLoading(false);
+      setMutationError("Failed to delete list. Please try again.");
     }
   };
-
 
   const handleCreateList = () => {
     setShowCreateModal(true);
   };
 
-
+  // ============================================
+  // CREATE: Now uses React Query mutation
+  // ============================================
   const handleSubmitList = async (name: string, description: string, qids: number[]) => {
-    // Note: qids are for show only, not sent to backend
-    setIsLoading(true);
-    setError(null);
+    setMutationError(null);
     
     try {
-      const response = await axios.post<List>('/api/py/lists', {
+      const newList = await createList({
         name: name.trim(),
         description: description.trim() || undefined,
       });
       
-      // Add new list to state (optimistic update)
-      const newList = response.data;
-      setLists([newList, ...lists]);
-      // Auto-select the newly created list
+      // React Query will refetch lists automatically
+      // Just select the new list and close modal
       setSelectedList(newList);
       setShowCreateModal(false);
     } catch (err) {
-      console.error('Failed to create list:', err);
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          setError("Please log in to create a list");
-        } else if (err.response?.status === 400) {
-          setError(err.response.data?.detail || "Invalid list data. Please check your input.");
-        } else {
-          setError("Failed to create list. Please try again.");
-        }
-      } else {
-        setError("Failed to create list. Please try again.");
-      }
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to create list:", err);
+      setMutationError("Failed to create list. Please try again.");
     }
   };
 
@@ -236,12 +187,12 @@ export default function ListsPage() {
         <div className="flex-1 overflow-hidden flex flex-col">
           {selectedList ? (
             <div className="flex-1 p-6 overflow-hidden">
+              {/* React Query handles cache sync - no onListUpdated needed! */}
               <ListDetailView
                 listId={selectedList.id}
                 listName={selectedList.name}
                 listDescription={selectedList.description}
                 onDeleteList={handleDeleteList}
-                onListUpdated={fetchLists}
               />
             </div>
           ) : (

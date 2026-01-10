@@ -17,7 +17,6 @@ export type ListDetailViewProps = {
   listName: string;
   listDescription?: string;
   onDeleteList: () => void;
-  onListUpdated?: () => void;
 };
 
 export type ProblemPillProps = {

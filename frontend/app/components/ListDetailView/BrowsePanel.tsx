@@ -6,6 +6,7 @@ import { useInView } from "react-intersection-observer";
 import axios from "axios";
 import { Question } from "../../types";
 import ProblemPill from "./ProblemPill";
+import { type AddProblemInput } from "../../hooks/useListProblems";
 
 type BrowsePanelProps = {
   searchQuery: string;
@@ -16,7 +17,7 @@ type BrowsePanelProps = {
   error: string | null;
   onClearError: () => void;
   isProblemInList: (qid: number) => boolean;
-  onAddProblem: (qid: number) => void;
+  onAddProblem: (input: AddProblemInput) => void;
 };
 
 // API function for fetching paginated problems (cursor-based)
@@ -136,7 +137,15 @@ export default function BrowsePanel({
                     difficulty={question.difficulty}
                     isPremium={question.is_premium}
                     isInList={isProblemInList(question.qid)}
-                    onAdd={() => onAddProblem(question.qid)}
+                    onAdd={() =>
+                      onAddProblem({
+                        qid: question.qid,
+                        title: question.title,
+                        difficulty: question.difficulty,
+                        tags: question.tags,
+                        isPremium: question.is_premium,
+                      })
+                    }
                   />
                 ))}
 
@@ -170,7 +179,15 @@ export default function BrowsePanel({
                     difficulty={question.difficulty}
                     isPremium={question.is_premium}
                     isInList={isProblemInList(question.qid)}
-                    onAdd={() => onAddProblem(question.qid)}
+                    onAdd={() =>
+                      onAddProblem({
+                        qid: question.qid,
+                        title: question.title,
+                        difficulty: question.difficulty,
+                        tags: question.tags,
+                        isPremium: question.is_premium,
+                      })
+                    }
                   />
                 ))}
               </div>

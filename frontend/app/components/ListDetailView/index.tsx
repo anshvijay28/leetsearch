@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { ListDetailViewProps } from "./types";
-import { useListProblems } from "../../hooks/useListProblems";
+import { useListProblems, type AddProblemInput } from "../../hooks/useListProblems";
 import { useListEdit } from "../../hooks/useListEdit";
 import { useProblemSearch } from "../../hooks/useProblemSearch";
 import ListHeader from "./ListHeader";
@@ -14,18 +14,20 @@ export default function ListDetailView({
   listName,
   listDescription,
   onDeleteList,
-  onListUpdated,
 }: ListDetailViewProps) {
-  // Custom hooks for managing state and logic
+  // ============================================
+  // React Query hooks - cache invalidation is automatic now!
+  // No need for onListUpdated callback anymore
+  // ============================================
   const {
     problems,
     isLoading: isLoadingProblems,
     error: problemsError,
-    setError: setProblemsError,
+    clearError: clearProblemsError,
     addProblem,
     removeProblem,
     isProblemInList,
-  } = useListProblems(listId, onListUpdated);
+  } = useListProblems(listId);
 
   const {
     isEditing,
@@ -38,7 +40,7 @@ export default function ListDetailView({
     startEditing,
     cancelEditing,
     saveEdit,
-  } = useListEdit(listId, listName, listDescription || "", onListUpdated);
+  } = useListEdit(listId, listName, listDescription || "");
 
   const {
     searchQuery,
@@ -64,8 +66,8 @@ export default function ListDetailView({
   // Combined error from all sources
   const displayError = problemsError || searchError;
 
-  const handleAddProblem = async (qid: number) => {
-    await addProblem(qid);
+  const handleAddProblem = async (input: AddProblemInput) => {
+    await addProblem(input);
   };
 
   const handleRemoveProblem = async (qid: number) => {
@@ -73,7 +75,7 @@ export default function ListDetailView({
   };
 
   const handleClearError = () => {
-    setProblemsError(null);
+    clearProblemsError();
     setSearchError(null);
   };
 
