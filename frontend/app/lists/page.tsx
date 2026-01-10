@@ -11,6 +11,7 @@ import ListDetailView from "../components/ListDetailView";
 type List = {
   id: string;
   name: string;
+  description?: string;
   problem_count: number;
 };
 
@@ -155,7 +156,7 @@ export default function ListsPage() {
   }
 
   return (
-    <div className="min-h-screen text-white flex flex-col">
+    <div className="h-screen text-white flex flex-col overflow-hidden">
       <Header />
 
       <main className="flex-1 flex overflow-hidden">
@@ -238,6 +239,7 @@ export default function ListsPage() {
               <ListDetailView
                 listId={selectedList.id}
                 listName={selectedList.name}
+                listDescription={selectedList.description}
                 onDeleteList={handleDeleteList}
                 onListUpdated={fetchLists}
               />

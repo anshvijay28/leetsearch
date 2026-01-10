@@ -1,7 +1,7 @@
 """
 Pydantic models for API request and response validation.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 
 
@@ -18,17 +18,48 @@ class Question(BaseModel):
 
 # Pydantic models for Lists
 class ListCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100, description="List name (1-100 characters)")
+    description: Optional[str] = Field(None, max_length=500, description="Optional description (max 500 characters)")
     # is_public field exists in database but is always set to False
     # Reserved for future URL sharing functionality
 
+    @field_validator('name', mode='before')
+    @classmethod
+    def strip_name(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
+
+    @field_validator('description', mode='before')
+    @classmethod
+    def strip_description(cls, v):
+        if isinstance(v, str):
+            stripped = v.strip()
+            return stripped if stripped else None
+        return v
+
 
 class ListUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100, description="List name (1-100 characters)")
+    description: Optional[str] = Field(None, max_length=500, description="Optional description (max 500 characters)")
     # is_public field exists in database but is not modifiable
     # Reserved for future URL sharing functionality
+
+    @field_validator('name', mode='before')
+    @classmethod
+    def strip_name(cls, v):
+        if isinstance(v, str):
+            stripped = v.strip()
+            return stripped if stripped else None
+        return v
+
+    @field_validator('description', mode='before')
+    @classmethod
+    def strip_description(cls, v):
+        if isinstance(v, str):
+            stripped = v.strip()
+            return stripped if stripped else None
+        return v
 
 
 class ListResponse(BaseModel):
@@ -43,7 +74,7 @@ class ListResponse(BaseModel):
 
 
 class AddProblemRequest(BaseModel):
-    problem_qid: int
+    problem_qid: int = Field(..., ge=1, le=10000, description="LeetCode question ID (1-10000)")
 
 
 class ListProblemResponse(BaseModel):

@@ -103,6 +103,57 @@ async def create_list(
     return created_list
 
 
+async def update_list(
+    list_id: str,
+    user_id: str,
+    name: Optional[str] = None,
+    description: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Update a list's name and/or description.
+    
+    Args:
+        list_id: UUID of the list to update
+        user_id: UUID of the user (must own the list)
+        name: New name for the list (optional)
+        description: New description for the list (optional)
+        
+    Returns:
+        Updated list dictionary
+        
+    Raises:
+        Exception: If list doesn't exist or user doesn't own it
+    """
+    supabase: Client = get_supabase_client()
+    
+    # Verify list exists and belongs to user
+    list_check = await get_list_by_id(list_id, user_id)
+    if not list_check:
+        raise Exception("List not found or you don't have permission to update it")
+    
+    # Build update data
+    update_data: Dict[str, Any] = {}
+    if name is not None:
+        update_data["name"] = name
+    if description is not None:
+        update_data["description"] = description
+    
+    if not update_data:
+        # Nothing to update, return existing list
+        return list_check
+    
+    # Update the list
+    response = supabase.table("lists").update(update_data).eq("id", list_id).eq("user_id", user_id).execute()
+    
+    if not response.data or len(response.data) == 0:
+        raise Exception("Failed to update list")
+    
+    updated_list = response.data[0]
+    updated_list["problem_count"] = await get_list_problem_count(list_id)
+    
+    return updated_list
+
+
 async def get_list_problem_count(list_id: str) -> int:
     """
     Get the number of problems in a list.
