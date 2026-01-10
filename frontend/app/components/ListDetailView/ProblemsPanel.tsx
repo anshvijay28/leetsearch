@@ -7,12 +7,14 @@ type ProblemsPanelProps = {
   problems: ListProblem[];
   isLoading: boolean;
   onRemove: (qid: number) => void;
+  onFindSimilar: (qid: number, title: string) => void;
 };
 
 export default function ProblemsPanel({
   problems,
   isLoading,
   onRemove,
+  onFindSimilar,
 }: ProblemsPanelProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden border-r border-zinc-800 pr-4">
@@ -41,8 +43,8 @@ export default function ProblemsPanel({
                 title={problem.title}
                 difficulty={problem.difficulty}
                 isPremium={problem.is_premium}
-                showLink={true}
                 onRemove={() => onRemove(problem.problem_qid)}
+                onFindSimilar={() => onFindSimilar(problem.problem_qid, problem.title)}
               />
             ))}
           </div>

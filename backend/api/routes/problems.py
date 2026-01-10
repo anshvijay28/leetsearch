@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query, Depends, Request
+from fastapi import APIRouter, HTTPException, Query, Depends, Request, Path
 from typing import List, Dict, Any, Optional
 import logging
 from services.auth import get_current_user
 from services.lists import fuzzy_search_problems, get_all_problems_paginated
+from services.question_fetcher import fetch_question_data
+from services.document_formatter import format_question_document
+from services.vector_search import get_query_results
 from ..models import Question
 from ..middleware.rate_limit import limiter, PROBLEMS_LIMIT
 
@@ -104,4 +107,44 @@ async def search_problems(
     except Exception as e:
         logger.error(f"Error searching problems for query '{query[:50]}': {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to search problems. Please try again.")
+
+
+@router.get("/{qid}/similar", response_model=List[Question])
+@limiter.limit(PROBLEMS_LIMIT)
+async def get_similar_problems(
+    request: Request,
+    qid: int = Path(..., description="Question ID to find similar problems for"),
+    limit: int = Query(15, description="Maximum number of similar problems to return", ge=1, le=30),
+    current_user: Any = Depends(get_current_user)
+):
+    try:
+        question_data = await fetch_question_data(qid)
+        if not question_data:
+            raise HTTPException(status_code=404, detail=f"Question with QID {qid} not found")
+        
+        formatted_doc = format_question_document(question_data)
+        
+        results = await get_query_results(formatted_doc)
+        
+        similar_results = [r for r in results if r["qid"] != qid][:limit]
+        
+        questions = [
+            Question(
+                id=result["qid"],
+                qid=result["qid"],
+                title=result["title"],
+                difficulty=result["difficulty"],
+                tags=result["tags"],
+                url=f"https://lcid.cc/{str(result['qid'])}",
+                is_premium=result.get("is_premium", False)
+            )
+            for result in similar_results
+        ]
+        
+        return questions
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error finding similar problems for QID {qid}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to find similar problems. Please try again.")
 

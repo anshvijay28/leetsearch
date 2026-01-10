@@ -8,9 +8,9 @@ export default function ProblemPill({
   difficulty,
   isPremium,
   isInList = false,
-  showLink = false,
   onAdd,
   onRemove,
+  onFindSimilar,
 }: ProblemPillProps) {
   const difficultyStyles = {
     Easy: "bg-green-500/20 text-green-400",
@@ -20,38 +20,56 @@ export default function ProblemPill({
 
   return (
     <div className="flex items-center h-12 px-1 bg-black/30 border border-zinc-800 rounded-full hover:bg-black/50 transition-colors group">
-      {/* QID Badge */}
-      <div className="w-12 h-10 flex items-center justify-center bg-[#06b6d4]/20 rounded-full ml-0.5">
-        <span className="text-lg font-bold text-[#06b6d4]">{qid}</span>
-      </div>
-
-      {/* Title */}
-      <div className="flex items-center flex-1 px-3 min-w-0">
-        {showLink ? (
-          <a
-            href={`https://lcid.cc/${qid}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-white hover:text-[#06b6d4] transition-colors truncate"
-          >
-            {title}
-          </a>
-        ) : (
-          <span className="text-sm text-white truncate">{title}</span>
-        )}
-        {isPremium && (
-          <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 flex-shrink-0">
-            Premium
-          </span>
-        )}
-      </div>
-
-      {/* Difficulty Badge */}
-      <span
-        className={`text-xs px-3 py-1 rounded-full flex-shrink-0 ${difficultyStyles[difficulty]}`}
+      <a
+        href={`https://lcid.cc/${qid}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center flex-1 min-w-0 h-full"
       >
-        {difficulty}
-      </span>
+        <div className="w-12 h-10 flex items-center justify-center bg-[#06b6d4]/20 rounded-full ml-0.5">
+          <span className="text-lg font-bold text-[#06b6d4]">{qid}</span>
+        </div>
+
+        <div className="flex items-center flex-1 px-3 min-w-0">
+          <span className="text-sm text-white hover:text-[#06b6d4] transition-colors truncate">
+            {title}
+          </span>
+          {isPremium && (
+            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 flex-shrink-0">
+              Premium
+            </span>
+          )}
+        </div>
+
+        <span
+          className={`text-xs px-3 py-1 rounded-full flex-shrink-0 ${difficultyStyles[difficulty]}`}
+        >
+          {difficulty}
+        </span>
+      </a>
+
+      {/* Find Similar Button */}
+      {onFindSimilar && (
+        <button
+          onClick={onFindSimilar}
+          className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-[#06b6d4] transition-colors opacity-0 group-hover:opacity-100"
+          title="Find similar problems"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </button>
+      )}
 
       {/* Action Button */}
       {onAdd && (

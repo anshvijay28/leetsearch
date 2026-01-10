@@ -26,18 +26,54 @@ export function useListEdit(
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // ============================================
-  // MUTATION: Save the edit
+  // MUTATION: Save the edit (OPTIMISTIC)
   // ============================================
   const saveMutation = useMutation({
     mutationFn: async (data: { name: string; description: string | null }) => {
       const response = await axios.put(`/api/py/lists/${listId}`, data);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate lists to update the sidebar
-      queryClient.invalidateQueries({ queryKey: ["lists"] });
+
+    // OPTIMISTIC: Update cache immediately before API call completes
+    onMutate: async (data) => {
+      // Cancel any in-flight fetches
+      await queryClient.cancelQueries({ queryKey: ["lists"] });
+
+      // Snapshot current state for rollback
+      const previousLists = queryClient.getQueryData<
+        { id: string; name: string; description?: string; problem_count: number }[]
+      >(["lists"]);
+
+      // Optimistically update the list in cache
+      queryClient.setQueryData(
+        ["lists"],
+        (old: { id: string; name: string; description?: string; problem_count: number }[] | undefined) =>
+          old?.map((list) =>
+            list.id === listId
+              ? { ...list, name: data.name, description: data.description ?? undefined }
+              : list
+          )
+      );
+
+      // Close edit mode immediately (feels instant!)
       setIsEditing(false);
       setValidationError(null);
+
+      return { previousLists };
+    },
+
+    // ROLLBACK: If API call fails, restore previous state
+    onError: (err, data, context) => {
+      if (context?.previousLists) {
+        queryClient.setQueryData(["lists"], context.previousLists);
+      }
+      // Re-open edit mode so user can try again
+      setIsEditing(true);
+    },
+
+    // SETTLE: Always refetch to ensure sync with server
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["lists"] });
     },
   });
 

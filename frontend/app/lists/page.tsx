@@ -36,6 +36,16 @@ export default function ListsPage() {
     }
   }, [isAuthenticated, loading, router]);
 
+  // Sync selectedList with cache when lists updates (e.g., after editing name/description)
+  useEffect(() => {
+    if (selectedList && lists.length > 0) {
+      const updatedList = lists.find((l) => l.id === selectedList.id);
+      if (updatedList && (updatedList.name !== selectedList.name || updatedList.description !== selectedList.description)) {
+        setSelectedList(updatedList);
+      }
+    }
+  }, [lists, selectedList]);
+
   const handleListClick = (list: List) => {
     setSelectedList(list);
   };

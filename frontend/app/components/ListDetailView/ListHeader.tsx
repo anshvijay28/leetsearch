@@ -4,6 +4,7 @@ import { useState } from "react";
 
 type ListHeaderProps = {
   listName: string;
+  listDescription?: string;
   problemCount: number;
   easyCount: number;
   mediumCount: number;
@@ -25,6 +26,7 @@ type ListHeaderProps = {
 
 export default function ListHeader({
   listName,
+  listDescription,
   problemCount,
   easyCount,
   mediumCount,
@@ -95,8 +97,11 @@ export default function ListHeader({
     <div className="border-b border-zinc-800 pb-4 mb-4 flex-shrink-0">
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
-          <h1 className="text-3xl font-semibold text-white mb-2">{listName}</h1>
-          <p className="text-sm text-zinc-400">{problemCount} questions</p>
+          <h1 className="text-3xl font-semibold text-white mb-1">{listName}</h1>
+          {listDescription && (
+            <p className="text-sm text-zinc-400 mb-1">{listDescription}</p>
+          )}
+          <p className="text-xs text-zinc-500">{problemCount} questions</p>
         </div>
         <div className="flex items-center gap-3">
           {showDeleteConfirm ? (

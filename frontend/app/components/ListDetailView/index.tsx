@@ -5,6 +5,7 @@ import { ListDetailViewProps } from "./types";
 import { useListProblems, type AddProblemInput } from "../../hooks/useListProblems";
 import { useListEdit } from "../../hooks/useListEdit";
 import { useProblemSearch } from "../../hooks/useProblemSearch";
+import { useSimilarProblems } from "../../hooks/useSimilarProblems";
 import ListHeader from "./ListHeader";
 import ProblemsPanel from "./ProblemsPanel";
 import BrowsePanel from "./BrowsePanel";
@@ -53,9 +54,20 @@ export default function ListDetailView({
     resetSearch,
   } = useProblemSearch();
 
-  // Reset search when listId changes
+  const {
+    similarQid,
+    similarTitle,
+    similarResults,
+    isLoadingSimilar,
+    error: similarError,
+    setError: setSimilarError,
+    findSimilar,
+    clearSimilar,
+  } = useSimilarProblems();
+
   useEffect(() => {
     resetSearch();
+    clearSimilar();
   }, [listId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate stats
@@ -63,8 +75,7 @@ export default function ListDetailView({
   const mediumCount = problems.filter((p) => p.difficulty === "Medium").length;
   const hardCount = problems.filter((p) => p.difficulty === "Hard").length;
 
-  // Combined error from all sources
-  const displayError = problemsError || searchError;
+  const displayError = problemsError || searchError || similarError;
 
   const handleAddProblem = async (input: AddProblemInput) => {
     await addProblem(input);
@@ -77,12 +88,19 @@ export default function ListDetailView({
   const handleClearError = () => {
     clearProblemsError();
     setSearchError(null);
+    setSimilarError(null);
+  };
+
+  const handleFindSimilar = (qid: number, title: string) => {
+    resetSearch();
+    findSimilar(qid, title);
   };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
       <ListHeader
         listName={listName}
+        listDescription={listDescription}
         problemCount={problems.length}
         easyCount={easyCount}
         mediumCount={mediumCount}
@@ -106,6 +124,7 @@ export default function ListDetailView({
           problems={problems}
           isLoading={isLoadingProblems}
           onRemove={handleRemoveProblem}
+          onFindSimilar={handleFindSimilar}
         />
 
         <BrowsePanel
@@ -118,6 +137,11 @@ export default function ListDetailView({
           onClearError={handleClearError}
           isProblemInList={isProblemInList}
           onAddProblem={handleAddProblem}
+          similarQid={similarQid}
+          similarTitle={similarTitle}
+          similarResults={similarResults}
+          isLoadingSimilar={isLoadingSimilar}
+          onClearSimilar={clearSimilar}
         />
       </div>
     </div>

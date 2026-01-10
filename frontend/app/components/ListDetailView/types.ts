@@ -25,8 +25,8 @@ export type ProblemPillProps = {
   difficulty: "Easy" | "Medium" | "Hard";
   isPremium: boolean;
   isInList?: boolean;
-  showLink?: boolean;
   onAdd?: () => void;
   onRemove?: () => void;
+  onFindSimilar?: () => void;
 };
 

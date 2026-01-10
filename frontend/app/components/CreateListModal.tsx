@@ -15,47 +15,17 @@ export default function CreateListModal({
 }: CreateListModalProps) {
   const [listName, setListName] = useState("");
   const [description, setDescription] = useState("");
-  const [qidInput, setQidInput] = useState("");
-  const [qids, setQids] = useState<number[]>([]);
   const [error, setError] = useState("");
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setListName("");
       setDescription("");
-      setQidInput("");
-      setQids([]);
       setError("");
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const handleAddQid = () => {
-    const trimmed = qidInput.trim();
-    if (!trimmed) return;
-
-    const qid = parseInt(trimmed, 10);
-    if (isNaN(qid) || qid <= 0) {
-      setError("Please enter a valid positive number for QID");
-      return;
-    }
-
-    if (qids.includes(qid)) {
-      setError("This QID is already in the list");
-      return;
-    }
-
-    setQids([...qids, qid]);
-    setQidInput("");
-    setError("");
-  };
-
-  const handleRemoveQid = (qidToRemove: number) => {
-    setQids(qids.filter((qid) => qid !== qidToRemove));
-    setError("");
-  };
 
   const handleSubmit = () => {
     if (!listName.trim()) {
@@ -63,26 +33,14 @@ export default function CreateListModal({
       return;
     }
 
-    // Call parent's onSubmit (which will close modal on success)
-    onSubmit(listName.trim(), description.trim(), qids);
-    // Form will be reset when modal closes via onClose
+    onSubmit(listName.trim(), description.trim(), []);
   };
 
   const handleClose = () => {
-    // Reset form on close
     setListName("");
     setDescription("");
-    setQidInput("");
-    setQids([]);
     setError("");
     onClose();
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddQid();
-    }
   };
 
   return (
@@ -150,79 +108,9 @@ export default function CreateListModal({
             />
           </div>
 
-          {/* QIDs Input */}
-          <div>
-            <label className="block text-sm font-semibold text-zinc-300 mb-2">
-              Problem IDs (QIDs)
-            </label>
-            <p className="text-xs text-zinc-500 mb-3">
-              Add LeetCode question IDs to include in this list
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={qidInput}
-                onChange={(e) => {
-                  setQidInput(e.target.value);
-                  setError("");
-                }}
-                onKeyPress={handleKeyPress}
-                placeholder="Enter QID (e.g., 1, 2, 3)..."
-                className="flex-1 px-4 py-3 rounded-lg bg-black/50 border border-[#06b6d4]/20 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#06b6d4]/40 transition-colors"
-              />
-              <button
-                onClick={handleAddQid}
-                className="px-6 py-3 rounded-lg bg-[#06b6d4] hover:bg-[#0891b2] text-white font-semibold transition-colors"
-              >
-                Add
-              </button>
-            </div>
-            {error && (
-              <p className="text-xs text-rose-400 mt-2">{error}</p>
-            )}
-
-            {/* QID Tags */}
-            {qids.length > 0 && (
-              <div className="mt-4">
-                <div className="flex flex-wrap gap-2">
-                  {qids.map((qid) => (
-                    <span
-                      key={qid}
-                      className="px-3 py-1.5 rounded-full text-sm bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-2"
-                    >
-                      {qid}
-                      <button
-                        onClick={() => handleRemoveQid(qid)}
-                        className="hover:text-cyan-200 cursor-pointer"
-                        type="button"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setQids([])}
-                  className="mt-3 text-xs text-zinc-400 hover:text-zinc-300 transition-colors"
-                  type="button"
-                >
-                  Clear all
-                </button>
-              </div>
-            )}
-          </div>
+          {error && (
+            <p className="text-xs text-rose-400 mt-2">{error}</p>
+          )}
         </div>
 
         {/* Footer Actions */}
