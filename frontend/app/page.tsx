@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Question } from "./types";
 import { SAMPLE_QUESTIONS } from "./data/sampleQuestions";
@@ -13,6 +13,43 @@ import ComingSoonModal from "./components/ComingSoonModal";
 import FilterModal from "./components/FilterModal";
 import { FilterOptions } from "./components/FilterPanel";
 
+const STORAGE_KEY = "leetsearch_state";
+
+type PersistedState = {
+  hasStartedSearching: boolean;
+  query: string;
+  results: Question[];
+  filters: FilterOptions;
+};
+
+const getPersistedState = (): PersistedState | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
+const persistState = (state: PersistedState) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    console.error("Failed to persist search state");
+  }
+};
+
+const clearPersistedState = () => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    console.error("Failed to clear persisted state");
+  }
+};
+
 export default function Home() {
   const [hasStartedSearching, setHasStartedSearching] = useState(false);
   const [query, setQuery] = useState("");
@@ -22,12 +59,29 @@ export default function Home() {
   const [searchError, setSearchError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     difficulty: [],
     excludePremium: false,
     includeTags: [],
   });
+
+  useEffect(() => {
+    const persisted = getPersistedState();
+    if (persisted) {
+      setHasStartedSearching(persisted.hasStartedSearching);
+      setQuery(persisted.query);
+      setResults(persisted.results);
+      setFilters(persisted.filters);
+    }
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    persistState({ hasStartedSearching, query, results, filters });
+  }, [hasStartedSearching, query, results, filters, isHydrated]);
 
   const handleSearch = async () => {
     // Validate query
@@ -92,6 +146,7 @@ export default function Home() {
       excludePremium: false,
       includeTags: [],
     });
+    clearPersistedState();
   };
 
   const getActiveFilterCount = () => {

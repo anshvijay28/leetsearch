@@ -478,3 +478,41 @@ async def delete_list(list_id: str, user_id: str) -> bool:
     
     return True
 
+
+async def get_lists_containing_problem(problem_qid: int, user_id: str) -> Dict[str, bool]:
+    """
+    Get which lists (owned by the user) contain a specific problem.
+    
+    Args:
+        problem_qid: LeetCode question ID
+        user_id: UUID of the user (only returns lists owned by this user)
+        
+    Returns:
+        Dictionary mapping list_id to True for lists that contain the problem
+        Format: { "list-id-1": True, "list-id-2": True }
+    """
+    supabase: Client = get_supabase_client()
+    
+    # Get all list_problems entries for this problem_qid
+    response = supabase.table("list_problems").select("list_id").eq("problem_qid", problem_qid).execute()
+    
+    if not response.data:
+        return {}
+    
+    # Get list IDs that contain the problem
+    list_ids_with_problem = {item["list_id"] for item in response.data}
+    
+    if not list_ids_with_problem:
+        return {}
+    
+    # Verify these lists belong to the user and build result
+    lists_response = supabase.table("lists").select("id").eq("user_id", user_id).in_("id", list(list_ids_with_problem)).execute()
+    
+    if not lists_response.data:
+        return {}
+    
+    # Build dictionary: { "list-id": True }
+    result = {str(list_item["id"]): True for list_item in lists_response.data}
+    
+    return result
+

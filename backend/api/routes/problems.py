@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Request, Path
 from typing import List, Dict, Any, Optional
 import logging
 from services.auth import get_current_user
-from services.lists import fuzzy_search_problems, get_all_problems_paginated
+from services.lists import fuzzy_search_problems, get_all_problems_paginated, get_lists_containing_problem
 from services.question_fetcher import fetch_question_data
 from services.document_formatter import format_question_document
 from services.vector_search import get_query_results
@@ -147,4 +147,30 @@ async def get_similar_problems(
     except Exception as e:
         logger.error(f"Error finding similar problems for QID {qid}: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to find similar problems. Please try again.")
+
+
+@router.get("/{qid}/lists", response_model=Dict[str, bool])
+@limiter.limit(PROBLEMS_LIMIT)
+async def get_problem_lists(
+    request: Request,
+    qid: int = Path(..., description="Question ID to find which lists contain it"),
+    current_user: Any = Depends(get_current_user)
+):
+    """
+    Get which lists (owned by the current user) contain a specific problem.
+    
+    Args:
+        qid: Question ID
+        current_user: Authenticated user (from JWT token)
+    
+    Returns:
+        Dictionary mapping list_id to True for lists that contain the problem
+        Format: { "list-id-1": True, "list-id-2": True }
+    """
+    try:
+        result = await get_lists_containing_problem(qid, current_user.id)
+        return result
+    except Exception as e:
+        logger.error(f"Error finding lists containing problem QID {qid}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to find lists containing this problem. Please try again.")
 

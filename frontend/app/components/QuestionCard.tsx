@@ -1,6 +1,9 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { Question } from "../types";
+import AddToListDropdown from "./AddToListDropdown";
 
 type QuestionCardProps = {
   question: Question;
@@ -9,16 +12,32 @@ type QuestionCardProps = {
 export default function QuestionCard({
   question,
 }: QuestionCardProps) {
+  const queryClient = useQueryClient();
+
   const handleClick = () => {
     if (question.url) {
       window.open(question.url, "_blank", "noopener,noreferrer");
     }
   };
 
+  const handleMouseEnter = () => {
+    queryClient.prefetchQuery({
+      queryKey: ["problem-lists", question.qid],
+      queryFn: async () => {
+        const response = await axios.get<Record<string, boolean>>(
+          `/api/py/problems/${question.qid}/lists`
+        );
+        return response.data;
+      },
+      staleTime: 5 * 60 * 1000,
+    });
+  };
+
   return (
     <div className="relative flex justify-center">
       <div
         onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
         className="w-full max-w-2xl text-left bg-gradient-to-r from-[#0a1628] via-[#0f1b2e] to-[#0a1628] border border-[#06b6d4]/20 hover:border-[#06b6d4]/40 hover:bg-gradient-to-r hover:from-[#0f1f35] hover:via-[#15243a] hover:to-[#0f1f35] transition-all px-5 py-5 flex flex-col gap-3 cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] rounded-xl"
       >
         <div className="flex items-center justify-between gap-3">
@@ -52,15 +71,18 @@ export default function QuestionCard({
             {question.difficulty}
           </span>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {question.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-[10px] px-2.5 py-1 rounded-full bg-[#06b6d4]/10 text-cyan-300 border border-[#06b6d4]/20"
-            >
-              {tag}
-            </span>
-          ))}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-1.5 flex-1">
+            {question.tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-[10px] px-2.5 py-1 rounded-full bg-[#06b6d4]/10 text-cyan-300 border border-[#06b6d4]/20"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          <AddToListDropdown question={question} />
         </div>
       </div>
     </div>

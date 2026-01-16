@@ -47,7 +47,7 @@ export function useSimilarProblems() {
     similarResults,
     isLoadingSimilar,
     error,
-    setError: () => {},
+    setError: (_: string | null) => {},
     findSimilar,
     clearSimilar,
   };
