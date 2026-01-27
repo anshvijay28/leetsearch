@@ -115,7 +115,7 @@ async def get_query_results(
             qid_list = list(seen_qids)
             metadata_cursor = metadata_collection.find(
                 {"qid": {"$in": qid_list}},
-                {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1}
+                {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1, "slug": 1}
             )
             
             # Build a map of qid to metadata
@@ -128,7 +128,8 @@ async def get_query_results(
                         "title": doc.get("title", ""),
                         "difficulty": doc.get("difficulty", ""),
                         "tags": doc.get("topics", []),
-                        "is_premium": doc.get("is_premium_question", False)
+                        "is_premium": doc.get("is_premium_question", False),
+                        "slug": doc.get("slug", "")
                     }
             
             # Combine vector search results with metadata, preserving score order

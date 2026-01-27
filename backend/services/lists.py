@@ -194,7 +194,7 @@ async def get_all_problems_paginated(cursor_qid: Optional[int], limit: int) -> D
     # Fetch limit + 1 to check if there are more results
     cursor = metadata_collection.find(
         query,
-        {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1}
+        {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1, "slug": 1}
     ).sort("qid", 1).limit(limit + 1)
     
     # Build results list
@@ -207,7 +207,8 @@ async def get_all_problems_paginated(cursor_qid: Optional[int], limit: int) -> D
                 "title": doc.get("title", ""),
                 "difficulty": doc.get("difficulty", ""),
                 "tags": doc.get("topics", []),
-                "is_premium": doc.get("is_premium_question", False)
+                "is_premium": doc.get("is_premium_question", False),
+                "slug": doc.get("slug", "")
             })
     
     # Check if there are more results (we fetched limit + 1)
@@ -244,7 +245,7 @@ async def fuzzy_search_problems(query: str, limit: int = 20) -> list[Dict[str, A
         # Search by exact QID
         cursor = metadata_collection.find(
             {"qid": qid},
-            {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1}
+            {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1, "slug": 1}
         ).limit(1)
     except ValueError:
         # Search by title using case-insensitive regex (substring match)
@@ -267,7 +268,7 @@ async def fuzzy_search_problems(query: str, limit: int = 20) -> list[Dict[str, A
         
         cursor = metadata_collection.find(
             {"title": regex_pattern},
-            {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1}
+            {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1, "slug": 1}
         ).limit(fetch_limit).sort("qid", 1)  # Sort by qid for consistent base order
     
     # Build results list
@@ -280,7 +281,8 @@ async def fuzzy_search_problems(query: str, limit: int = 20) -> list[Dict[str, A
                 "title": doc.get("title", "") or "",
                 "difficulty": doc.get("difficulty", ""),
                 "tags": doc.get("topics", []),
-                "is_premium": doc.get("is_premium_question", False)
+                "is_premium": doc.get("is_premium_question", False),
+                "slug": doc.get("slug", "")
             })
 
     # For text queries, prioritize titles using a smart ranking heuristic:
@@ -333,7 +335,7 @@ async def get_problem_metadata(qids: List[int]) -> Dict[int, Dict[str, Any]]:
     # Fetch metadata for all qids
     metadata_cursor = metadata_collection.find(
         {"qid": {"$in": qids}},
-        {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1}
+        {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1, "slug": 1}
     )
     
     # Build a map of qid to metadata
@@ -346,7 +348,8 @@ async def get_problem_metadata(qids: List[int]) -> Dict[int, Dict[str, Any]]:
                 "title": doc.get("title", ""),
                 "difficulty": doc.get("difficulty", ""),
                 "tags": doc.get("topics", []),
-                "is_premium": doc.get("is_premium_question", False)
+                "is_premium": doc.get("is_premium_question", False),
+                "slug": doc.get("slug", "")
             }
     
     return metadata_map
@@ -401,7 +404,8 @@ async def get_list_problems(list_id: str, user_id: str) -> list[Dict[str, Any]]:
                 "title": f"Problem {qid}",
                 "difficulty": "Unknown",
                 "tags": [],
-                "is_premium": False
+                "is_premium": False,
+                "slug": ""
             })
         
         problems_with_metadata.append(problem_data)

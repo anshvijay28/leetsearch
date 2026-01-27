@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import axios from "axios";
 import { Question } from "./types";
 import SearchBar from "./components/SearchBar";
@@ -138,8 +139,23 @@ export default function Home() {
       <div className="flex-1 flex flex-col">
         <div className="relative z-10 flex flex-col h-full min-h-0">
           <main className="flex-1 min-h-0 flex flex-col items-center px-4 py-6 md:py-10 relative z-10">
-            <div className={`w-full max-w-6xl mx-auto flex flex-col gap-8 h-full ${results.length === 0 ? 'justify-center' : ''}`}>
-              <div className="w-full max-w-3xl mx-auto flex flex-col h-full min-h-0">
+            <div className={`w-full max-w-6xl mx-auto flex flex-col gap-8 h-full ${results.length === 0 && !isLoading ? 'justify-center' : ''}`}>
+              <div className={`w-full max-w-3xl mx-auto flex flex-col ${results.length === 0 && !isLoading ? '' : 'h-full min-h-0'}`}>
+                {results.length === 0 && !isLoading && (
+                  <motion.div
+                    className="flex-shrink-0 mb-6 text-center"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Find your next coding challenge
+                    </h1>
+                    <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+                      Search by topic, difficulty, or describe the problem you want to solve
+                    </p>
+                  </motion.div>
+                )}
                 <div className="flex-shrink-0">
                   <SearchBar
                     query={query}
@@ -154,14 +170,21 @@ export default function Home() {
                     onFilterClick={() => setShowFilterModal(true)}
                     filterActiveCount={getActiveFilterCount()}
                     filterButtonRef={filterButtonRef}
+                    onClear={() => {
+                      setResults([]);
+                      setQuery("");
+                    }}
+                    hasResults={results.length > 0}
                   />
                 </div>
-                <div className="flex-1 min-h-0">
-                  <ResultsList
-                    results={results}
-                    isLoading={isLoading}
-                  />
-                </div>
+                {results.length > 0 || isLoading ? (
+                  <div className="flex-1 min-h-0">
+                    <ResultsList
+                      results={results}
+                      isLoading={isLoading}
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
           </main>

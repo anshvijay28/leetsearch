@@ -56,8 +56,13 @@ export default function QuestionCard({
       return;
     }
 
-    if (question.url) {
-      window.open(question.url, "_blank", "noopener,noreferrer");
+    // Use slug-based URL if available, otherwise fall back to question.url
+    const problemUrl = question.slug
+      ? `https://leetcode.com/problems/${question.slug}`
+      : question.url;
+
+    if (problemUrl) {
+      window.open(problemUrl, "_blank", "noopener,noreferrer");
     }
   };
 

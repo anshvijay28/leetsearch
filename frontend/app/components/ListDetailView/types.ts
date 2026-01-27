@@ -10,6 +10,7 @@ export type ListProblem = {
   difficulty: "Easy" | "Medium" | "Hard";
   tags: string[];
   is_premium: boolean;
+  slug?: string;
 };
 
 export type ListDetailViewProps = {
@@ -24,6 +25,7 @@ export type ProblemPillProps = {
   title: string;
   difficulty: "Easy" | "Medium" | "Hard";
   isPremium: boolean;
+  slug?: string;
   isInList?: boolean;
   onAdd?: () => void;
   onRemove?: () => void;

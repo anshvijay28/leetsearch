@@ -76,7 +76,7 @@ async def search_questions(
                 title=result["title"],
                 difficulty=result["difficulty"],
                 tags=result["tags"],
-                url=f"https://lcid.cc/{str(result['qid'])}",
+                url=f"https://leetcode.com/problems/{result.get('slug', '')}" if result.get("slug") else f"https://lcid.cc/{str(result['qid'])}",
                 is_premium=result.get("is_premium", False)
             )
             for result in results

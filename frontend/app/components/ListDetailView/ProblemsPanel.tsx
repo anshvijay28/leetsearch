@@ -43,6 +43,7 @@ export default function ProblemsPanel({
                 title={problem.title}
                 difficulty={problem.difficulty}
                 isPremium={problem.is_premium}
+                slug={problem.slug}
                 onRemove={() => onRemove(problem.problem_qid)}
                 onFindSimilar={() => onFindSimilar(problem.problem_qid, problem.title)}
               />

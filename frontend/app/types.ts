@@ -6,5 +6,6 @@ export type Question = {
   tags: string[];
   url: string;
   is_premium: boolean;
+  slug?: string;
 };
 

@@ -112,6 +112,7 @@ export default function BrowsePanel({
           title={question.title}
           difficulty={question.difficulty}
           isPremium={question.is_premium}
+          slug={question.slug}
           isInList={isProblemInList(question.qid)}
           onAdd={() =>
             onAddProblem({

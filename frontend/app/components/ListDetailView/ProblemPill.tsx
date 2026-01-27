@@ -8,6 +8,7 @@ export default function ProblemPill({
   title,
   difficulty,
   isPremium,
+  slug,
   isInList = false,
   onAdd,
   onRemove,
@@ -29,6 +30,7 @@ export default function ProblemPill({
   };
 
   const difficultyStyle = difficultyStyles[difficulty] || difficultyStyles.Medium;
+  const problemUrl = slug ? `https://leetcode.com/problems/${slug}` : `https://lcid.cc/${qid}`;
 
   return (
     <div className={cn(
@@ -38,7 +40,7 @@ export default function ProblemPill({
       "hover:shadow-[0_4px_12px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_2px_12px_rgba(255,255,255,0.03)]"
     )}>
       <a
-        href={`https://lcid.cc/${qid}`}
+        href={problemUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center flex-1 min-w-0 gap-3"

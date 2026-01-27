@@ -14,6 +14,8 @@ type SearchBarProps = {
   onFilterClick?: () => void;
   filterActiveCount?: number;
   filterButtonRef?: React.RefObject<HTMLButtonElement | null>;
+  onClear?: () => void;
+  hasResults?: boolean;
 };
 
 export default function SearchBar({
@@ -25,6 +27,8 @@ export default function SearchBar({
   onFilterClick,
   filterActiveCount = 0,
   filterButtonRef,
+  onClear,
+  hasResults = false,
 }: SearchBarProps) {
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,7 +56,7 @@ export default function SearchBar({
   }, [query]);
 
   return (
-    <div className="mb-8">
+    <div className={cn(hasResults ? "mb-8" : "")}>
       <div className="flex items-center gap-3">
         <motion.div
           className={cn(
@@ -135,6 +139,21 @@ export default function SearchBar({
                       {filterActiveCount}
                     </motion.span>
                   )}
+                </button>
+              )}
+              {onClear && hasResults && (
+                <button
+                  type="button"
+                  onClick={onClear}
+                  className={cn(
+                    "px-3 h-9 inline-flex items-center justify-center rounded-xl transition-colors cursor-pointer text-[11px] font-medium",
+                    "bg-gray-100/80 dark:bg-white/10",
+                    "hover:bg-gray-200/80 dark:hover:bg-white/20",
+                    "text-gray-700 dark:text-gray-300"
+                  )}
+                  title="Clear results"
+                >
+                  Clear
                 </button>
               )}
             </div>

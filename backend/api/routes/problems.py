@@ -43,7 +43,7 @@ async def get_problems(
                 title=problem["title"],
                 difficulty=problem["difficulty"],
                 tags=problem["tags"],
-                url=f"https://lcid.cc/{str(problem['qid'])}",
+                url=f"https://leetcode.com/problems/{problem.get('slug', '')}" if problem.get("slug") else f"https://lcid.cc/{str(problem['qid'])}",
                 is_premium=problem.get("is_premium", False)
             )
             for problem in result["problems"]
@@ -95,7 +95,7 @@ async def search_problems(
                 title=result["title"],
                 difficulty=result["difficulty"],
                 tags=result["tags"],
-                url=f"https://lcid.cc/{str(result['qid'])}",
+                url=f"https://leetcode.com/problems/{result.get('slug', '')}" if result.get("slug") else f"https://lcid.cc/{str(result['qid'])}",
                 is_premium=result.get("is_premium", False)
             )
             for result in results
@@ -135,7 +135,7 @@ async def get_similar_problems(
                 title=result["title"],
                 difficulty=result["difficulty"],
                 tags=result["tags"],
-                url=f"https://lcid.cc/{str(result['qid'])}",
+                url=f"https://leetcode.com/problems/{result.get('slug', '')}" if result.get("slug") else f"https://lcid.cc/{str(result['qid'])}",
                 is_premium=result.get("is_premium", False)
             )
             for result in similar_results

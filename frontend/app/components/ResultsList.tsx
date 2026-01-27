@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import { Question } from "../types";
 import QuestionCard from "./QuestionCard";
@@ -40,6 +41,18 @@ export default function ResultsList({
   results,
   isLoading = false,
 }: ResultsListProps) {
+  // Deduplicate results by qid (keep first occurrence)
+  const deduplicatedResults = React.useMemo(() => {
+    const seen = new Set<number>();
+    return results.filter((q) => {
+      if (seen.has(q.qid)) {
+        return false;
+      }
+      seen.add(q.qid);
+      return true;
+    });
+  }, [results]);
+
   if (isLoading) {
     return (
       <motion.div
@@ -58,7 +71,7 @@ export default function ResultsList({
     );
   }
 
-  if (results.length === 0) {
+  if (deduplicatedResults.length === 0) {
     return null;
   }
 
@@ -74,19 +87,19 @@ export default function ResultsList({
           Results
         </div>
         <div className="text-[11px] text-gray-600 dark:text-gray-400">
-          {results.length}{" "}
-          {results.length === 1 ? "match" : "matches"}
+          {deduplicatedResults.length}{" "}
+          {deduplicatedResults.length === 1 ? "match" : "matches"}
         </div>
       </motion.div>
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
         <div className="grid grid-cols-1 gap-3 pb-24">
-          {results.map((q, index) => {
+          {deduplicatedResults.map((q, index) => {
             const hasPersistentHover = false;
 
             return (
               <motion.div
-                key={q.id}
+                key={q.qid}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{
