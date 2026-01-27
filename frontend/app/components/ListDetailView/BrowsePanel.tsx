@@ -25,6 +25,18 @@ type BrowsePanelProps = {
   onClearSimilar: () => void;
 };
 
+// Helper function to deduplicate problems by QID
+const deduplicateByQid = (problems: Question[]): Question[] => {
+  const seen = new Set<number>();
+  return problems.filter((problem) => {
+    if (seen.has(problem.qid)) {
+      return false;
+    }
+    seen.add(problem.qid);
+    return true;
+  });
+};
+
 // API function for fetching paginated problems (cursor-based)
 const fetchProblemsPage = async (cursor: number | null) => {
   const params: { limit: number; cursor?: number } = { limit: 15 };
@@ -82,17 +94,38 @@ export default function BrowsePanel({
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Flatten all pages into single array and deduplicate by QID
-  const allBrowseProblems = (() => {
-    const allProblems = data?.pages.flatMap((page) => page.problems) ?? [];
-    const seen = new Set<number>();
-    return allProblems.filter((problem) => {
-      if (seen.has(problem.qid)) {
-        return false;
-      }
-      seen.add(problem.qid);
-      return true;
-    });
-  })();
+  const allBrowseProblems = deduplicateByQid(
+    data?.pages.flatMap((page) => page.problems) ?? []
+  );
+
+  // Deduplicate search and similar results by QID
+  const deduplicatedSearchResults = deduplicateByQid(searchResults);
+  const deduplicatedSimilarResults = deduplicateByQid(similarResults);
+
+  // Helper function to render a list of ProblemPills
+  const renderProblemList = (problems: Question[]) => (
+    <div className="space-y-2">
+      {problems.map((question, index) => (
+        <ProblemPill
+          key={`${question.qid}-${index}`}
+          qid={question.qid}
+          title={question.title}
+          difficulty={question.difficulty}
+          isPremium={question.is_premium}
+          isInList={isProblemInList(question.qid)}
+          onAdd={() =>
+            onAddProblem({
+              qid: question.qid,
+              title: question.title,
+              difficulty: question.difficulty,
+              tags: question.tags,
+              isPremium: question.is_premium,
+            })
+          }
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -163,28 +196,8 @@ export default function BrowsePanel({
               <div className="text-center py-12">
                 <p className="text-sm text-gray-600 dark:text-white/70">Finding similar problems...</p>
               </div>
-            ) : similarResults.length > 0 ? (
-              <div className="space-y-2">
-                {similarResults.map((question) => (
-                  <ProblemPill
-                    key={question.qid}
-                    qid={question.qid}
-                    title={question.title}
-                    difficulty={question.difficulty}
-                    isPremium={question.is_premium}
-                    isInList={isProblemInList(question.qid)}
-                    onAdd={() =>
-                      onAddProblem({
-                        qid: question.qid,
-                        title: question.title,
-                        difficulty: question.difficulty,
-                        tags: question.tags,
-                        isPremium: question.is_premium,
-                      })
-                    }
-                  />
-                ))}
-              </div>
+            ) : deduplicatedSimilarResults.length > 0 ? (
+              renderProblemList(deduplicatedSimilarResults)
             ) : (
               <div className="text-center py-12">
                 <p className="text-sm text-gray-600 dark:text-white/60">
@@ -209,27 +222,8 @@ export default function BrowsePanel({
                 <p className="text-sm text-gray-600 dark:text-white/60">No problems available.</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {allBrowseProblems.map((question, index) => (
-                  <ProblemPill
-                    key={`${question.qid}-${index}`}
-                    qid={question.qid}
-                    title={question.title}
-                    difficulty={question.difficulty}
-                    isPremium={question.is_premium}
-                    isInList={isProblemInList(question.qid)}
-                    onAdd={() =>
-                      onAddProblem({
-                        qid: question.qid,
-                        title: question.title,
-                        difficulty: question.difficulty,
-                        tags: question.tags,
-                        isPremium: question.is_premium,
-                      })
-                    }
-                  />
-                ))}
-
+              <>
+                {renderProblemList(allBrowseProblems)}
                 {/* Sentinel div for infinite scroll */}
                 <div ref={bottomRef} className="py-4 text-center">
                   {isFetchingNextPage ? (
@@ -240,7 +234,7 @@ export default function BrowsePanel({
                     <p className="text-sm text-gray-500 dark:text-white/50">No more problems</p>
                   )}
                 </div>
-              </div>
+              </>
             )}
           </>
         ) : (
@@ -250,28 +244,8 @@ export default function BrowsePanel({
               <div className="text-center py-12">
                 <p className="text-sm text-gray-600 dark:text-white/70">Searching...</p>
               </div>
-            ) : searchResults.length > 0 ? (
-              <div className="space-y-2">
-                {searchResults.map((question) => (
-                  <ProblemPill
-                    key={question.qid}
-                    qid={question.qid}
-                    title={question.title}
-                    difficulty={question.difficulty}
-                    isPremium={question.is_premium}
-                    isInList={isProblemInList(question.qid)}
-                    onAdd={() =>
-                      onAddProblem({
-                        qid: question.qid,
-                        title: question.title,
-                        difficulty: question.difficulty,
-                        tags: question.tags,
-                        isPremium: question.is_premium,
-                      })
-                    }
-                  />
-                ))}
-              </div>
+            ) : deduplicatedSearchResults.length > 0 ? (
+              renderProblemList(deduplicatedSearchResults)
             ) : (
               <div className="text-center py-12">
                 <p className="text-sm text-gray-600 dark:text-white/60">
