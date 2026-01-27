@@ -1,20 +1,61 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Question } from "../types";
 import AddToListDropdown from "./AddToListDropdown";
+import { cn } from "@/lib/utils";
 
 type QuestionCardProps = {
   question: Question;
+  colSpan?: number;
+  hasPersistentHover?: boolean;
+};
+
+const getDifficultyColors = (difficulty: string) => {
+  switch (difficulty) {
+    case "Easy":
+      return {
+        bg: "bg-emerald-500/10 dark:bg-emerald-500/20",
+        text: "text-emerald-600 dark:text-emerald-400",
+        hover: "group-hover:bg-emerald-500/20 dark:group-hover:bg-emerald-500/30",
+      };
+    case "Medium":
+      return {
+        bg: "bg-amber-500/10 dark:bg-amber-500/20",
+        text: "text-amber-600 dark:text-amber-400",
+        hover: "group-hover:bg-amber-500/20 dark:group-hover:bg-amber-500/30",
+      };
+    case "Hard":
+      return {
+        bg: "bg-rose-500/10 dark:bg-rose-500/20",
+        text: "text-rose-600 dark:text-rose-400",
+        hover: "group-hover:bg-rose-500/20 dark:group-hover:bg-rose-500/30",
+      };
+    default:
+      return {
+        bg: "bg-black/5 dark:bg-white/10",
+        text: "text-gray-600 dark:text-gray-300",
+        hover: "group-hover:bg-black/10 dark:group-hover:bg-white/20",
+      };
+  }
 };
 
 export default function QuestionCard({
   question,
+  colSpan,
+  hasPersistentHover = false,
 }: QuestionCardProps) {
   const queryClient = useQueryClient();
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Don't open URL if clicking on the dropdown area
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-dropdown-container]')) {
+      return;
+    }
+
     if (question.url) {
       window.open(question.url, "_blank", "noopener,noreferrer");
     }
@@ -33,56 +74,101 @@ export default function QuestionCard({
     });
   };
 
+  const meta = question.is_premium ? `Q${question.qid} • Premium` : `Q${question.qid}`;
+  const difficultyColors = getDifficultyColors(question.difficulty);
+
   return (
-    <div className="relative flex justify-center">
+    <div
+      className={cn(
+        "group relative p-3 rounded-xl overflow-x-hidden overflow-y-visible transition-all duration-300 cursor-pointer",
+        "border bg-white dark:bg-black",
+        "border-gray-200/80 dark:border-white/10",
+        "shadow-[0_2px_4px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-none",
+        "hover:shadow-[0_6px_16px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_2px_12px_rgba(255,255,255,0.03)]",
+        "hover:-translate-y-0.5 will-change-transform",
+        colSpan === 2 ? "md:col-span-2" : "",
+        {
+          "shadow-[0_6px_16px_rgba(0,0,0,0.12),0_2px_4px_rgba(0,0,0,0.08)] -translate-y-0.5":
+            hasPersistentHover,
+          "dark:shadow-[0_2px_12px_rgba(255,255,255,0.03)]":
+            hasPersistentHover,
+        }
+      )}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+    >
+      {/* Dotted pattern background */}
       <div
-        onClick={handleClick}
-        onMouseEnter={handleMouseEnter}
-        className="w-full max-w-2xl text-left bg-gradient-to-r from-[#0a1628] via-[#0f1b2e] to-[#0a1628] border border-[#06b6d4]/20 hover:border-[#06b6d4]/40 hover:bg-gradient-to-r hover:from-[#0f1f35] hover:via-[#15243a] hover:to-[#0f1f35] transition-all px-5 py-5 flex flex-col gap-3 cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] rounded-xl"
+        className={cn(
+          "absolute inset-0 transition-opacity duration-300",
+          hasPersistentHover
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100"
+        )}
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="text-sm md:text-base font-semibold text-white flex items-center gap-2 min-w-0">
-              <span className="text-cyan-400 mr-2 shrink-0">Q{question.qid}:</span>
-              <span className="truncate">{question.title}</span>
-            </div>
-            {question.is_premium && (
-              <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/30">
-                <svg
-                  className="w-3 h-3 text-yellow-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span className="text-[10px] font-semibold text-yellow-400">Premium</span>
-              </div>
-            )}
-          </div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[length:4px_4px]" />
+      </div>
+
+      {/* Gradient border */}
+      <div
+        className={cn(
+          "absolute inset-0 -z-10 rounded-xl p-px bg-gradient-to-br from-transparent via-gray-200/40 to-transparent dark:via-white/10 transition-opacity duration-300",
+          hasPersistentHover
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100"
+        )}
+      />
+
+      <div className="relative flex flex-col space-y-1.5">
+        {/* Difficulty badge at top left */}
+        <div className="flex items-center justify-between">
           <span
-            className={`text-[10px] px-2.5 py-1 rounded-full font-semibold tracking-wide shrink-0 ${
-              question.difficulty === "Easy"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                : question.difficulty === "Medium"
-                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-            }`}
+            className={cn(
+              "text-xs font-medium px-2 py-1 rounded-lg backdrop-blur-sm",
+              "transition-colors duration-300",
+              difficultyColors.bg,
+              difficultyColors.text,
+              difficultyColors.hover
+            )}
           >
             {question.difficulty}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-1.5 flex-1">
-            {question.tags.map((tag) => (
+
+        {/* Title and Meta */}
+        <h3 className="font-medium text-gray-900 dark:text-gray-100 tracking-tight text-[15px]">
+          {question.title}
+          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">
+            {meta}
+          </span>
+        </h3>
+
+        {/* Tags and Add to List at bottom right */}
+        <div className="flex items-center justify-between mt-auto pt-1">
+          <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 flex-wrap gap-2">
+            {question.tags?.slice(0, 3).map((tag, i) => (
               <span
-                key={tag}
-                className="text-[10px] px-2.5 py-1 rounded-full bg-[#06b6d4]/10 text-cyan-300 border border-[#06b6d4]/20"
+                key={i}
+                className="px-2 py-1 rounded-md bg-gray-100/80 dark:bg-white/10 backdrop-blur-sm transition-all duration-200 hover:bg-gray-200/80 dark:hover:bg-white/20"
+                onClick={(e) => e.stopPropagation()}
               >
                 {tag}
               </span>
             ))}
           </div>
-          <AddToListDropdown question={question} />
+          <div
+            className="pointer-events-auto relative z-50 overflow-visible"
+            data-dropdown-container
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <AddToListDropdown question={question} />
+          </div>
         </div>
       </div>
     </div>

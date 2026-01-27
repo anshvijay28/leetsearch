@@ -101,7 +101,7 @@ export default function BrowsePanel({
           <div className="flex items-center gap-3 mb-2">
             <button
               onClick={onClearSimilar}
-              className="flex items-center gap-1 text-zinc-400 hover:text-[#06b6d4] transition-colors text-sm"
+              className="flex items-center gap-1 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors text-sm"
             >
               <svg
                 className="w-4 h-4"
@@ -119,16 +119,19 @@ export default function BrowsePanel({
               Back to Browse
             </button>
           </div>
-          <h3 className="text-lg font-semibold text-zinc-300">
-            Similar to: <span className="text-[#06b6d4]">{similarTitle}</span>
+          <h3 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 dark:text-white/60 mb-1">
+            Similar to
           </h3>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+            {similarTitle}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-white/60">
             Problems with similar concepts and patterns
           </p>
         </div>
       ) : (
         <>
-          <h3 className="text-lg font-semibold text-zinc-300 mb-4 flex-shrink-0">
+          <h3 className="text-[11px] uppercase tracking-[0.18em] text-gray-500 dark:text-white/60 mb-4 flex-shrink-0">
             {browseMode ? "Browse Problems" : "Search Results"}
           </h3>
 
@@ -141,11 +144,11 @@ export default function BrowsePanel({
                 onClearError();
               }}
               placeholder="Search by name or QID (e.g., 'Two Sum' or '1')..."
-              className="w-full px-4 py-2 rounded-lg bg-black/50 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#06b6d4]/40 transition-colors"
+              className="w-full rounded-xl border px-4 py-3 text-sm transition-colors bg-white dark:bg-white/5 border-black/10 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 focus:ring-2 focus:ring-black/10 dark:focus:border-white/20 dark:focus:ring-white/10"
             />
 
             {(error || queryError) && (
-              <div className="mt-3 p-3 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-400 text-sm">
+              <div className="mt-3 p-3 rounded-xl bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 text-rose-500 dark:text-rose-400 text-sm">
                 {error || (queryError as Error)?.message}
               </div>
             )}
@@ -158,7 +161,7 @@ export default function BrowsePanel({
           <>
             {isLoadingSimilar ? (
               <div className="text-center py-12">
-                <p className="text-[#06b6d4]">Finding similar problems...</p>
+                <p className="text-sm text-gray-600 dark:text-white/70">Finding similar problems...</p>
               </div>
             ) : similarResults.length > 0 ? (
               <div className="space-y-2">
@@ -184,7 +187,7 @@ export default function BrowsePanel({
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-zinc-400">
+                <p className="text-sm text-gray-600 dark:text-white/60">
                   No similar problems found.
                 </p>
               </div>
@@ -195,15 +198,15 @@ export default function BrowsePanel({
           <>
             {status === "pending" ? (
               <div className="text-center py-12">
-                <p className="text-[#06b6d4]">Loading problems...</p>
+                <p className="text-sm text-gray-600 dark:text-white/70">Loading problems...</p>
               </div>
             ) : status === "error" ? (
               <div className="text-center py-12">
-                <p className="text-rose-400">Failed to load problems</p>
+                <p className="text-sm text-rose-500 dark:text-rose-400">Failed to load problems</p>
               </div>
             ) : allBrowseProblems.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-zinc-400">No problems available.</p>
+                <p className="text-sm text-gray-600 dark:text-white/60">No problems available.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -230,11 +233,11 @@ export default function BrowsePanel({
                 {/* Sentinel div for infinite scroll */}
                 <div ref={bottomRef} className="py-4 text-center">
                   {isFetchingNextPage ? (
-                    <p className="text-[#06b6d4]">Loading more...</p>
+                    <p className="text-sm text-gray-600 dark:text-white/70">Loading more...</p>
                   ) : hasNextPage ? (
-                    <p className="text-zinc-500">Scroll for more</p>
+                    <p className="text-sm text-gray-500 dark:text-white/50">Scroll for more</p>
                   ) : (
-                    <p className="text-zinc-500">No more problems</p>
+                    <p className="text-sm text-gray-500 dark:text-white/50">No more problems</p>
                   )}
                 </div>
               </div>
@@ -245,7 +248,7 @@ export default function BrowsePanel({
           <>
             {isSearching ? (
               <div className="text-center py-12">
-                <p className="text-[#06b6d4]">Searching...</p>
+                <p className="text-sm text-gray-600 dark:text-white/70">Searching...</p>
               </div>
             ) : searchResults.length > 0 ? (
               <div className="space-y-2">
@@ -271,7 +274,7 @@ export default function BrowsePanel({
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-zinc-400">
+                <p className="text-sm text-gray-600 dark:text-white/60">
                   No results found. Try a different search query.
                 </p>
               </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useLists } from "../hooks/useLists";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -14,7 +15,9 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
   const [isOpen, setIsOpen] = useState(false);
   const [showNoListsMessage, setShowNoListsMessage] = useState(false);
   const [addedToLists, setAddedToLists] = useState<Set<string>>(new Set());
+  const [position, setPosition] = useState<{ top: number; right: number } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const { lists, isLoading } = useLists();
   const queryClient = useQueryClient();
 
@@ -65,17 +68,44 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleButtonClick = (e: React.MouseEvent) => {
+  const updatePosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 8, // 8px = mt-2, fixed positioning is relative to viewport
+        right: window.innerWidth - rect.right,
+      });
+    }
+  };
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+    e.preventDefault();
     
     if (lists.length === 0 && !isLoading) {
+      updatePosition();
       setShowNoListsMessage(true);
       setTimeout(() => setShowNoListsMessage(false), 3000);
       return;
     }
     
-    setIsOpen(!isOpen);
+    updatePosition();
+    setIsOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (isOpen || showNoListsMessage) {
+      updatePosition();
+      const handleScroll = () => updatePosition();
+      const handleResize = () => updatePosition();
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('scroll', handleScroll, true);
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [isOpen, showNoListsMessage]);
 
   const handleAddToList = async (e: React.MouseEvent, listId: string, listName: string) => {
     e.stopPropagation();
@@ -103,39 +133,38 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
     }
   };
 
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={handleButtonClick}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#06b6d4]/20 hover:bg-[#06b6d4]/30 border border-[#06b6d4]/30 text-cyan-300 text-xs font-medium transition-colors"
-        title="Add to list"
-      >
-        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-        <span>Add to List</span>
-      </button>
-
-      {showNoListsMessage && (
-        <div className="absolute right-0 mt-2 w-56 p-3 rounded-lg bg-zinc-900 border border-zinc-700 shadow-xl z-50">
-          <p className="text-sm text-zinc-300">
+  const dropdownContent = (
+    <>
+      {showNoListsMessage && position && (
+        <div 
+          ref={dropdownRef}
+          className="fixed z-[9999] w-64 rounded-xl border border-black/10 dark:border-gray-800/80 bg-white/95 text-gray-900 dark:bg-black/90 dark:text-gray-100 p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+          style={{ top: `${position.top}px`, right: `${position.right}px`, transform: "translateX(8px)" }}
+        >
+          <p className="text-sm text-gray-700 dark:text-gray-200">
             You don&apos;t have any lists yet. Create a list first from the{" "}
-            <span className="text-cyan-400 font-medium">Lists</span> page.
+            <span className="font-medium text-teal-600 dark:text-teal-300">Lists</span> page.
           </p>
         </div>
       )}
 
-      {isOpen && lists.length > 0 && (
-        <div className="absolute right-0 mt-2 w-56 rounded-lg bg-zinc-900 border border-zinc-700 shadow-xl z-50 overflow-hidden">
-          <div className="px-3 py-2 border-b border-zinc-700">
-            <p className="text-xs text-zinc-400 font-medium">Add to list</p>
+      {isOpen && lists.length > 0 && position && (
+        <div 
+          ref={dropdownRef}
+          className="fixed z-[9999] w-72 overflow-hidden rounded-xl border border-black/10 dark:border-gray-800/80 bg-white/95 text-gray-900 dark:bg-black/95 dark:text-gray-100 shadow-[0_18px_45px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          style={{ top: `${position.top}px`, right: `${position.right}px`, transform: "translateX(8px)" }}
+        >
+          <div className="border-b border-black/10 dark:border-gray-800/80 px-4 py-2.5">
+            <p className="text-xs font-medium tracking-[0.16em] text-gray-500 dark:text-gray-400 uppercase">
+              Add to list
+            </p>
           </div>
           {isLoadingMembership ? (
-            <div className="px-3 py-4 text-center">
-              <p className="text-sm text-zinc-400">Loading...</p>
+            <div className="px-4 py-4 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
             </div>
           ) : (
-            <div className="max-h-48 overflow-y-auto">
+            <div className="max-h-56 overflow-y-auto scrollbar-hide py-1">
               {lists.map((list) => {
                 const alreadyInList = isProblemInList(list.id);
                 
@@ -144,24 +173,28 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
                     key={list.id}
                     onClick={(e) => handleAddToList(e, list.id, list.name)}
                     disabled={alreadyInList}
-                    className={`w-full px-3 py-2.5 text-left transition-colors flex items-center justify-between group ${
+                    className={`group flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
                       alreadyInList 
-                        ? "opacity-60 cursor-not-allowed" 
-                        : "hover:bg-zinc-800"
+                        ? "cursor-not-allowed opacity-70" 
+                        : "hover:bg-black/5 dark:hover:bg-white/5"
                     }`}
                   >
-                    <span className={`text-sm truncate ${alreadyInList ? "text-zinc-400" : "text-zinc-200"}`}>
+                    <span
+                      className={`truncate ${
+                        alreadyInList ? "text-gray-500" : "text-gray-900 dark:text-gray-100"
+                      }`}
+                    >
                       {list.name}
                     </span>
                     {alreadyInList ? (
-                      <span className="text-xs text-emerald-400 flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         Added
                       </span>
                     ) : (
-                      <span className="text-xs text-zinc-500 group-hover:text-zinc-400">
+                      <span className="text-xs text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300">
                         {list.problem_count} problems
                       </span>
                     )}
@@ -172,6 +205,25 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
           )}
         </div>
       )}
+    </>
+  );
+
+  return (
+    <div className="relative z-50" onClick={(e) => e.stopPropagation()}>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={handleButtonClick}
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors backdrop-blur-sm bg-black/5 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/20 pointer-events-auto relative z-50"
+        title="Add to list"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Add to List</span>
+      </button>
+
+      {(isOpen || showNoListsMessage) && typeof document !== 'undefined' && createPortal(dropdownContent, document.body)}
     </div>
   );
 }

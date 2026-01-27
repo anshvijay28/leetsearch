@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { updateProfile, checkUsernameAvailability } from "@/lib/profile";
+import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -123,8 +124,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#020205] text-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 dark:border-white/40"></div>
       </div>
     );
   }
@@ -134,30 +135,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-start px-4 pt-32">
       <div className="w-full max-w-md mx-auto">
-        <div className="mb-8 text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-[#06b6d4] transition-colors mb-4"
-          >
-            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[#06b6d4] via-[#3b82f6] to-[#6366f1]" />
-            <span className="font-semibold tracking-tight text-[#06b6d4]">
-              LeetSearch
-            </span>
-          </Link>
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2">
-            Profile Settings
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Update your username
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[#27272f] bg-black/70 backdrop-blur-md shadow-[0_0_60px_rgba(15,23,42,0.75)] p-6 md:p-8 space-y-6">
+        <div className="rounded-2xl border border-gray-100/80 dark:border-white/10 bg-white/95 dark:bg-black/95 backdrop-blur-xl shadow-lg p-6 md:p-8 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <label htmlFor="current-username" className="text-sm font-medium text-zinc-200">
+            <div>
+              <label htmlFor="current-username" className="block text-xs font-semibold tracking-[0.18em] uppercase text-gray-500 dark:text-white/60 mb-3">
                 Current Username
               </label>
               <input
@@ -165,12 +148,12 @@ export default function ProfilePage() {
                 type="text"
                 value={user?.username || ""}
                 disabled
-                className="w-full rounded-lg border border-[#27272f] bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-400 cursor-not-allowed"
+                className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-3 text-sm text-gray-500 dark:text-white/50 cursor-not-allowed"
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium text-zinc-200">
+            <div>
+              <label htmlFor="username" className="block text-xs font-semibold tracking-[0.18em] uppercase text-gray-500 dark:text-white/60 mb-3">
                 New Username
               </label>
               <input
@@ -184,30 +167,43 @@ export default function ProfilePage() {
                   setError(null);
                   setSuccess(false);
                 }}
-                className={`w-full rounded-lg border ${
-                  error && error.includes("Username")
-                    ? "border-red-500/50"
-                    : availabilityCheck.available === false
-                    ? "border-red-500/50"
-                    : availabilityCheck.available === true
-                    ? "border-green-500/50"
-                    : "border-[#27272f]"
-                } bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#06b6d4] focus:border-transparent`}
+                className={cn(
+                  "w-full rounded-xl border px-4 py-3 text-sm transition-colors",
+                  "bg-white dark:bg-white/5",
+                  "border-black/10 dark:border-white/10",
+                  "text-gray-900 dark:text-white",
+                  "placeholder:text-gray-400 dark:placeholder:text-white/30",
+                  "focus:outline-none focus:border-black/20 focus:ring-2 focus:ring-black/10",
+                  "dark:focus:border-white/20 dark:focus:ring-white/10",
+                  error && error.includes("Username") ? "border-rose-500/30 focus:border-rose-500/50" : "",
+                  availabilityCheck.available === false ? "border-rose-500/30 focus:border-rose-500/50" : "",
+                  availabilityCheck.available === true ? "border-emerald-500/30 focus:border-emerald-500/50" : ""
+                )}
                 placeholder="yourusername"
                 disabled={isUpdating}
               />
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-xs mt-2">
                 {availabilityCheck.checking && (
-                  <span className="text-zinc-400">Checking availability...</span>
+                  <span className="text-gray-600 dark:text-white/70">Checking availability...</span>
                 )}
                 {!availabilityCheck.checking && availabilityCheck.available === true && (
-                  <span className="text-green-400">✓ Username available</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Username available
+                  </span>
                 )}
                 {!availabilityCheck.checking && availabilityCheck.available === false && (
-                  <span className="text-red-400">✗ Username taken</span>
+                  <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Username taken
+                  </span>
                 )}
                 {!username && (
-                  <span className="text-zinc-500">
+                  <span className="text-gray-500 dark:text-white/50">
                     3-20 characters, letters, numbers, and underscores only
                   </span>
                 )}
@@ -215,14 +211,20 @@ export default function ProfilePage() {
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-                <p className="text-xs text-red-400">{error}</p>
+              <div className="rounded-xl bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 px-3 py-2 flex items-center gap-2">
+                <svg className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-rose-500 dark:text-rose-400">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-3 py-2">
-                <p className="text-xs text-green-400">
+              <div className="rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 px-3 py-2 flex items-center gap-2">
+                <svg className="w-4 h-4 shrink-0 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <p className="text-xs text-emerald-500 dark:text-emerald-400">
                   Username updated successfully!
                 </p>
               </div>
@@ -232,7 +234,7 @@ export default function ProfilePage() {
               <Link href="/" className="flex-1">
                 <button
                   type="button"
-                  className="w-full inline-flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-[#27272f] px-3 py-2.5 text-sm font-medium text-zinc-200 transition-colors cursor-pointer"
+                  className="w-full h-9 inline-flex items-center justify-center rounded-lg bg-black/5 dark:bg-white/10 text-gray-800 dark:text-white/80 text-sm font-medium transition-colors hover:bg-black/10 dark:hover:bg-white/20 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -240,7 +242,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={isUpdating || availabilityCheck.checking || username === user?.username || availabilityCheck.available !== true}
-                className="flex-1 inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#06b6d4] via-[#3b82f6] to-[#6366f1] px-3 py-2.5 text-sm font-medium text-white shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 h-9 inline-flex items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black text-sm font-semibold transition-colors hover:bg-black/90 dark:hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isUpdating ? "Saving..." : availabilityCheck.available === true ? "Save" : "Update Username"}
               </button>
@@ -250,7 +252,7 @@ export default function ProfilePage() {
               <Link href="/">
                 <button
                   type="button"
-                  className="w-full inline-flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-[#27272f] px-3 py-2.5 text-sm font-medium text-zinc-200 transition-colors cursor-pointer"
+                  className="w-full h-9 inline-flex items-center justify-center rounded-lg bg-black/5 dark:bg-white/10 text-gray-800 dark:text-white/80 text-sm font-medium transition-colors hover:bg-black/10 dark:hover:bg-white/20 cursor-pointer"
                 >
                   Go Home
                 </button>
