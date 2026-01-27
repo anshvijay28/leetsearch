@@ -1,10 +1,27 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-	--background: #020205;
-	--foreground: #f9fafb;
+	/* Light mode palette */
+	--background: #f5f6f8;
+	/* slightly cooler gray for better contrast with white cards */
+	--foreground: #0b1220;
+	/* deep navy for better contrast */
+
+	--accent: #0891b2;
+	/* cyan-600 */
+	--accent-soft: rgba(8, 145, 178, 0.18);
+}
+
+.dark {
+	/* Dark mode palette */
+	--background: #0a0a0a;
+	/* very dark gray - darker than pure black to contrast with black cards */
+	--foreground: #f8fafc;
+
 	--accent: #06b6d4;
-	--accent-soft: #164e63;
+	--accent-soft: rgba(6, 182, 212, 0.18);
 }
 
 @theme inline {
@@ -14,19 +31,22 @@
 	--font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: #020205;
-		--foreground: #f9fafb;
-	}
+body {
+	min-height: 100vh;
+	background: var(--background);
+	color: var(--foreground);
+	overflow: hidden;
+	transition: none;
+}
+
+html {
+	height: 100%;
+	background: var(--background);
+	transition: none;
 }
 
 body {
-	min-height: 100vh;
-	background: radial-gradient(circle at top left, #1f2937 0, transparent 45%),
-		radial-gradient(circle at bottom right, #06b6d422 0, transparent 55%),
-		radial-gradient(circle at top right, #0f172a 0, transparent 45%), #020205;
-	color: var(--foreground);
+	height: 100%;
 }
 
 nextjs-portal {
@@ -38,10 +58,20 @@ nextjs-portal {
 
 /* Hide scrollbar but keep scroll functionality */
 .scrollbar-hide {
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none;
+	/* IE and Edge */
+	scrollbar-width: none;
+	/* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-	display: none; /* Chrome, Safari and Opera */
+	display: none;
+	/* Chrome, Safari and Opera */
+}
+
+.lab-bg::before {
+	overflow: hidden;
+	max-width: 100vw;
+	max-height: 100vh;
+	box-sizing: border-box;
 }

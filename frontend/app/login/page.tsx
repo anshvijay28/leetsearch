@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -86,28 +87,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-start px-4 pt-20 pb-8">
       <div className="w-full max-w-md mx-auto">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-[#06b6d4] transition-colors mb-4">
-            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[#06b6d4] via-[#3b82f6] to-[#6366f1]" />
-            <span className="font-semibold tracking-tight text-[#06b6d4]">
-              LeetSearch
-            </span>
-          </Link>
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2">
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2 text-gray-900 dark:text-white">
             Welcome back
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-gray-600 dark:text-white/60">
             Sign in to continue to your account
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#27272f] bg-black/70 backdrop-blur-md shadow-[0_0_60px_rgba(15,23,42,0.75)] p-6 md:p-8 space-y-6">
+        <div className={cn(
+          "rounded-2xl border border-white/10 bg-white/95 dark:bg-black/95 backdrop-blur-xl",
+          "shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.75)]",
+          "p-6 md:p-8 space-y-6"
+        )}>
           <button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-lg bg-white hover:bg-gray-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg text-base font-semibold text-gray-900 border-2 border-transparent hover:border-gray-200"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-white hover:bg-gray-50 dark:bg-white/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -127,20 +126,20 @@ export default function LoginPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            <span>
+            <span className="text-gray-700 dark:text-white font-medium text-sm">
               {isLoading ? "Signing in..." : "Sign in with Google"}
             </span>
           </button>
 
-          <div className="flex items-center gap-3 text-xs text-zinc-500">
-            <div className="h-px flex-1 bg-[#27272f]" />
+          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-white/50">
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
             <span>or continue with email</span>
-            <div className="h-px flex-1 bg-[#27272f]" />
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
           </div>
 
           <form onSubmit={handleEmailLogin} className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-zinc-200">
+              <label htmlFor="email" className="block text-xs font-semibold tracking-[0.18em] uppercase text-gray-500 dark:text-white/60">
                 Email
               </label>
               <input
@@ -150,7 +149,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-[#27272f] bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#06b6d4] focus:border-transparent"
+                className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 focus:ring-2 focus:ring-black/10 dark:focus:border-white/20 dark:focus:ring-white/10"
                 placeholder="you@example.com"
                 disabled={isLoading}
               />
@@ -158,12 +157,12 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium text-zinc-200">
+                <label htmlFor="password" className="block text-xs font-semibold tracking-[0.18em] uppercase text-gray-500 dark:text-white/60">
                   Password
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-zinc-400 hover:text-[#06b6d4] transition-colors"
+                  className="text-xs text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                 >
                   Forgot password?
                 </Link>
@@ -176,14 +175,14 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-[#27272f] bg-zinc-950/60 px-3 py-2.5 pr-10 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#06b6d4] focus:border-transparent"
+                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 pr-10 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 focus:ring-2 focus:ring-black/10 dark:focus:border-white/20 dark:focus:ring-white/10"
                   placeholder="••••••••"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white/80 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -201,23 +200,26 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-                <p className="text-xs text-red-400">{error}</p>
+              <div className="rounded-xl bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 px-3 py-2 flex items-center gap-2">
+                <svg className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-rose-500 dark:text-rose-400">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#06b6d4] via-[#3b82f6] to-[#6366f1] px-3 py-2.5 text-sm font-medium text-white shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full h-10 inline-flex items-center justify-center rounded-xl bg-black text-white dark:bg-white dark:text-black text-sm font-semibold transition-colors hover:bg-black/90 dark:hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </form>
 
-          <p className="text-xs text-center text-zinc-500">
+          <p className="text-xs text-center text-gray-500 dark:text-white/50">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-zinc-300 hover:text-[#06b6d4] transition-colors">
+            <Link href="/signup" className="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-white/80 transition-colors font-medium">
               Sign up
             </Link>
           </p>
