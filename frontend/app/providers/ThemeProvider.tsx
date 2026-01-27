@@ -37,8 +37,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (!isHydrated || typeof window === "undefined") return;
     window.localStorage.setItem(STORAGE_KEY, mode);
     const root = document.documentElement;
+    const body = document.body;
     // Tailwind's dark variant relies on a .dark class on the root element.
     root.classList.toggle("dark", mode === "dark");
+    body.classList.toggle("dark", mode === "dark");
     root.dataset.theme = mode;
     root.style.colorScheme = mode;
   }, [mode, isHydrated]);

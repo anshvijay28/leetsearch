@@ -7,7 +7,6 @@ import SearchBar from "./components/SearchBar";
 import ResultsList from "./components/ResultsList";
 import ComingSoonModal from "./components/ComingSoonModal";
 import FilterModal, { FilterOptions } from "./components/FilterModal";
-import { useTheme } from "./providers/ThemeProvider";
 
 const STORAGE_KEY = "leetsearch_state";
 
@@ -47,7 +46,6 @@ export default function Home() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
-  const { mode } = useTheme();
   const [filters, setFilters] = useState<FilterOptions>({
     difficulty: [],
     excludePremium: false,
@@ -136,9 +134,8 @@ export default function Home() {
   };
 
   return (
-    <div className="h-[calc(100vh-72px)] overflow-hidden text-white flex flex-col relative">
-      <div className={mode === "dark" ? "dark flex-1 flex flex-col" : "flex-1 flex flex-col"}>
-
+    <div className="h-[calc(100vh-72px)] overflow-hidden flex flex-col relative">
+      <div className="flex-1 flex flex-col">
         <div className="relative z-10 flex flex-col h-full min-h-0">
           <main className="flex-1 min-h-0 flex flex-col items-center px-4 py-6 md:py-10 relative z-10">
             <div className={`w-full max-w-6xl mx-auto flex flex-col gap-8 h-full ${results.length === 0 ? 'justify-center' : ''}`}>
