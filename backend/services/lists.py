@@ -256,21 +256,48 @@ async def fuzzy_search_problems(query: str, limit: int = 20) -> list[Dict[str, A
         cursor = metadata_collection.find(
             {"title": regex_pattern},
             {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1}
-        ).limit(limit).sort("qid", 1)  # Sort by qid for consistent results
+        ).limit(limit).sort("qid", 1)  # Sort by qid for consistent base order
     
     # Build results list
-    results = []
+    results: list[Dict[str, Any]] = []
     async for doc in cursor:
         qid = doc.get("qid")
         if qid:
             results.append({
                 "qid": qid,
-                "title": doc.get("title", ""),
+                "title": doc.get("title", "") or "",
                 "difficulty": doc.get("difficulty", ""),
                 "tags": doc.get("topics", []),
                 "is_premium": doc.get("is_premium_question", False)
             })
-    
+
+    # For text queries, prioritize titles using a smart ranking heuristic:
+    # 1. Exact matches (title == query) - highest priority
+    # 2. Prefix matches - sorted by title length (shorter first)
+    # 3. Other substring matches - sorted by title length (shorter first)
+    trimmed_query = query.strip().lower()
+    if trimmed_query:
+        exact_matches: list[Dict[str, Any]] = []
+        prefix_matches: list[Dict[str, Any]] = []
+        other_matches: list[Dict[str, Any]] = []
+        
+        for item in results:
+            title_lower = item["title"].lower()
+            if title_lower == trimmed_query:
+                exact_matches.append(item)
+            elif title_lower.startswith(trimmed_query):
+                prefix_matches.append(item)
+            else:
+                other_matches.append(item)
+        
+        # Sort each group by title length (shorter = more relevant)
+        exact_matches.sort(key=lambda x: len(x["title"]))
+        prefix_matches.sort(key=lambda x: len(x["title"]))
+        other_matches.sort(key=lambda x: len(x["title"]))
+        
+        # Combine in priority order
+        results = exact_matches + prefix_matches + other_matches
+
     return results
 
 
