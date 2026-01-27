@@ -6,6 +6,7 @@ import { useLists } from "../hooks/useLists";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Question } from "../types";
+import { useAuth } from "../contexts/AuthContext";
 
 type AddToListDropdownProps = {
   question: Question;
@@ -14,11 +15,13 @@ type AddToListDropdownProps = {
 export default function AddToListDropdown({ question }: AddToListDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showNoListsMessage, setShowNoListsMessage] = useState(false);
+  const [showLoginMessage, setShowLoginMessage] = useState(false);
   const [addedToLists, setAddedToLists] = useState<Set<string>>(new Set());
   const [position, setPosition] = useState<{ top: number; right: number } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { lists, isLoading } = useLists();
+  const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: membership, isLoading: isLoadingMembership } = useQuery({
@@ -61,6 +64,7 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setShowNoListsMessage(false);
+        setShowLoginMessage(false);
       }
     };
 
@@ -81,20 +85,27 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
+    if (!isAuthenticated) {
+      updatePosition();
+      setShowLoginMessage(true);
+      setTimeout(() => setShowLoginMessage(false), 3000);
+      return;
+    }
+
     if (lists.length === 0 && !isLoading) {
       updatePosition();
       setShowNoListsMessage(true);
       setTimeout(() => setShowNoListsMessage(false), 3000);
       return;
     }
-    
+
     updatePosition();
     setIsOpen((prev) => !prev);
   };
 
   useEffect(() => {
-    if (isOpen || showNoListsMessage) {
+    if (isOpen || showNoListsMessage || showLoginMessage) {
       updatePosition();
       const handleScroll = () => updatePosition();
       const handleResize = () => updatePosition();
@@ -105,17 +116,17 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
         window.removeEventListener('resize', handleResize);
       };
     }
-  }, [isOpen, showNoListsMessage]);
+  }, [isOpen, showNoListsMessage, showLoginMessage]);
 
   const handleAddToList = async (e: React.MouseEvent, listId: string, listName: string) => {
     e.stopPropagation();
-    
+
     if (isProblemInList(listId)) {
       return;
     }
-    
+
     setAddedToLists((prev) => new Set(prev).add(listId));
-    
+
     try {
       await addMutation.mutateAsync({ listId, qid: question.qid });
     } catch (error) {
@@ -124,8 +135,8 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
         next.delete(listId);
         return next;
       });
-      if (axios.isAxiosError(error) && error.response?.status === 400 && 
-          error.response?.data?.detail?.toLowerCase().includes("already exists")) {
+      if (axios.isAxiosError(error) && error.response?.status === 400 &&
+        error.response?.data?.detail?.toLowerCase().includes("already exists")) {
         setAddedToLists((prev) => new Set(prev).add(listId));
       } else {
         console.error("Failed to add problem to list:", error);
@@ -135,8 +146,22 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
 
   const dropdownContent = (
     <>
+      {showLoginMessage && position && (
+        <div
+          ref={dropdownRef}
+          className="fixed z-[9999] w-64 rounded-xl border border-black/10 dark:border-gray-800/80 bg-white/95 text-gray-900 dark:bg-black/90 dark:text-gray-100 p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+          style={{ top: `${position.top}px`, right: `${position.right}px`, transform: "translateX(8px)" }}
+        >
+          <p className="text-sm text-gray-700 dark:text-gray-200">
+            You must be logged in to add problems to lists. Please{" "}
+            <a href="/login" className="font-medium text-teal-600 dark:text-teal-300 hover:underline">sign in</a>{" "}
+            to continue.
+          </p>
+        </div>
+      )}
+
       {showNoListsMessage && position && (
-        <div 
+        <div
           ref={dropdownRef}
           className="fixed z-[9999] w-64 rounded-xl border border-black/10 dark:border-gray-800/80 bg-white/95 text-gray-900 dark:bg-black/90 dark:text-gray-100 p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)] backdrop-blur-xl"
           style={{ top: `${position.top}px`, right: `${position.right}px`, transform: "translateX(8px)" }}
@@ -149,7 +174,7 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
       )}
 
       {isOpen && lists.length > 0 && position && (
-        <div 
+        <div
           ref={dropdownRef}
           className="fixed z-[9999] w-72 overflow-hidden rounded-xl border border-black/10 dark:border-gray-800/80 bg-white/95 text-gray-900 dark:bg-black/95 dark:text-gray-100 shadow-[0_18px_45px_rgba(0,0,0,0.45)] backdrop-blur-xl"
           style={{ top: `${position.top}px`, right: `${position.right}px`, transform: "translateX(8px)" }}
@@ -167,22 +192,20 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
             <div className="max-h-56 overflow-y-auto scrollbar-hide py-1">
               {lists.map((list) => {
                 const alreadyInList = isProblemInList(list.id);
-                
+
                 return (
                   <button
                     key={list.id}
                     onClick={(e) => handleAddToList(e, list.id, list.name)}
                     disabled={alreadyInList}
-                    className={`group flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
-                      alreadyInList 
-                        ? "cursor-not-allowed opacity-70" 
+                    className={`group flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${alreadyInList
+                        ? "cursor-not-allowed opacity-70"
                         : "hover:bg-black/5 dark:hover:bg-white/5"
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`truncate ${
-                        alreadyInList ? "text-gray-500" : "text-gray-900 dark:text-gray-100"
-                      }`}
+                      className={`truncate ${alreadyInList ? "text-gray-500" : "text-gray-900 dark:text-gray-100"
+                        }`}
                     >
                       {list.name}
                     </span>
@@ -223,7 +246,7 @@ export default function AddToListDropdown({ question }: AddToListDropdownProps) 
         <span>Add to List</span>
       </button>
 
-      {(isOpen || showNoListsMessage) && typeof document !== 'undefined' && createPortal(dropdownContent, document.body)}
+      {(isOpen || showNoListsMessage || showLoginMessage) && typeof document !== 'undefined' && createPortal(dropdownContent, document.body)}
     </div>
   );
 }

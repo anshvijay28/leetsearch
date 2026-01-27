@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -86,11 +87,11 @@ export default function ResetPasswordPage() {
 
   if (isValidSession === null) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-gray-900 dark:text-white">
         <div className="w-full max-w-md mx-auto text-center">
           <div className="animate-pulse">
-            <div className="h-6 w-6 mx-auto rounded-md bg-gradient-to-br from-[#06b6d4] via-[#3b82f6] to-[#6366f1]" />
-            <p className="mt-4 text-zinc-400">Loading...</p>
+            <div className="h-6 w-6 mx-auto rounded-md bg-gradient-to-br from-cyan-600 via-blue-500 to-indigo-500 dark:from-cyan-500 dark:via-blue-400 dark:to-indigo-400" />
+            <p className="mt-4 text-gray-600 dark:text-white/60">Loading...</p>
           </div>
         </div>
       </div>
@@ -99,30 +100,34 @@ export default function ResetPasswordPage() {
 
   if (isValidSession === false) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-gray-900 dark:text-white">
         <div className="w-full max-w-md mx-auto">
           <div className="mb-8 text-center">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-[#06b6d4] transition-colors mb-4">
-              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[#06b6d4] via-[#3b82f6] to-[#6366f1]" />
-              <span className="font-semibold tracking-tight text-[#06b6d4]">
+            <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors mb-4">
+              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-cyan-600 via-blue-500 to-indigo-500 dark:from-cyan-500 dark:via-blue-400 dark:to-indigo-400" />
+              <span className="font-semibold tracking-tight text-gray-900 dark:text-white">
                 LeetSearch
               </span>
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-[#27272f] bg-black/70 backdrop-blur-md shadow-[0_0_60px_rgba(15,23,42,0.75)] p-6 md:p-8 text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 flex items-center justify-center">
-              <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={cn(
+            "rounded-2xl border border-white/10 bg-white/95 dark:bg-black/95 backdrop-blur-xl",
+            "shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.75)]",
+            "p-6 md:p-8 text-center space-y-4"
+          )}>
+            <div className="w-16 h-16 mx-auto rounded-full bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h1 className="text-xl font-semibold">Invalid or expired link</h1>
-            <p className="text-sm text-zinc-400">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Invalid or expired link</h1>
+            <p className="text-sm text-gray-600 dark:text-white/60">
               This password reset link is invalid or has expired.
             </p>
             <Link
               href="/forgot-password"
-              className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#06b6d4] via-[#3b82f6] to-[#6366f1] px-4 py-2.5 text-sm font-medium text-white shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110 transition"
+              className="inline-flex items-center justify-center rounded-xl bg-black text-white dark:bg-white dark:text-black px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-black/90 dark:hover:bg-white/90"
             >
               Request a new link
             </Link>
@@ -134,33 +139,37 @@ export default function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-gray-900 dark:text-white">
         <div className="w-full max-w-md mx-auto">
           <div className="mb-8 text-center">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-[#06b6d4] transition-colors mb-4">
-              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[#06b6d4] via-[#3b82f6] to-[#6366f1]" />
-              <span className="font-semibold tracking-tight text-[#06b6d4]">
+            <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors mb-4">
+              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-cyan-600 via-blue-500 to-indigo-500 dark:from-cyan-500 dark:via-blue-400 dark:to-indigo-400" />
+              <span className="font-semibold tracking-tight text-gray-900 dark:text-white">
                 LeetSearch
               </span>
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-[#27272f] bg-black/70 backdrop-blur-md shadow-[0_0_60px_rgba(15,23,42,0.75)] p-6 md:p-8 text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
-              <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={cn(
+            "rounded-2xl border border-white/10 bg-white/95 dark:bg-black/95 backdrop-blur-xl",
+            "shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.75)]",
+            "p-6 md:p-8 text-center space-y-4"
+          )}>
+            <div className="w-16 h-16 mx-auto rounded-full bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-xl font-semibold">Password updated!</h1>
-            <p className="text-sm text-zinc-400">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Password updated!</h1>
+            <p className="text-sm text-gray-600 dark:text-white/60">
               Your password has been successfully reset.
             </p>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-gray-500 dark:text-white/50">
               Redirecting you to login...
             </p>
             <Link
               href="/login"
-              className="inline-block mt-2 text-sm text-[#06b6d4] hover:underline"
+              className="inline-block mt-2 text-sm text-gray-900 dark:text-white font-medium hover:underline"
             >
               Go to login now
             </Link>
@@ -171,27 +180,31 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-gray-900 dark:text-white">
       <div className="w-full max-w-md mx-auto">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-[#06b6d4] transition-colors mb-4">
-            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[#06b6d4] via-[#3b82f6] to-[#6366f1]" />
-            <span className="font-semibold tracking-tight text-[#06b6d4]">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors mb-4">
+            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-cyan-600 via-blue-500 to-indigo-500 dark:from-cyan-500 dark:via-blue-400 dark:to-indigo-400" />
+            <span className="font-semibold tracking-tight text-gray-900 dark:text-white">
               LeetSearch
             </span>
           </Link>
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2">
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2 text-gray-900 dark:text-white">
             Set new password
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-gray-600 dark:text-white/60">
             Enter your new password below
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#27272f] bg-black/70 backdrop-blur-md shadow-[0_0_60px_rgba(15,23,42,0.75)] p-6 md:p-8 space-y-6">
+        <div className={cn(
+          "rounded-2xl border border-white/10 bg-white/95 dark:bg-black/95 backdrop-blur-xl",
+          "shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.75)]",
+          "p-6 md:p-8 space-y-6"
+        )}>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-zinc-200">
+              <label htmlFor="password" className="block text-xs font-semibold tracking-[0.18em] uppercase text-gray-500 dark:text-white/60">
                 New Password
               </label>
               <div className="relative">
@@ -202,14 +215,14 @@ export default function ResetPasswordPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-[#27272f] bg-zinc-950/60 px-3 py-2.5 pr-10 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#06b6d4] focus:border-transparent"
+                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 pr-10 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 focus:ring-2 focus:ring-black/10 dark:focus:border-white/20 dark:focus:ring-white/10"
                   placeholder="••••••••"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white/80 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -224,11 +237,11 @@ export default function ResetPasswordPage() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-zinc-500">Must be at least 6 characters</p>
+              <p className="text-xs text-gray-500 dark:text-white/50">Must be at least 6 characters</p>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium text-zinc-200">
+              <label htmlFor="confirmPassword" className="block text-xs font-semibold tracking-[0.18em] uppercase text-gray-500 dark:text-white/60">
                 Confirm New Password
               </label>
               <div className="relative">
@@ -239,14 +252,14 @@ export default function ResetPasswordPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-lg border border-[#27272f] bg-zinc-950/60 px-3 py-2.5 pr-10 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#06b6d4] focus:border-transparent"
+                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 pr-10 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 focus:ring-2 focus:ring-black/10 dark:focus:border-white/20 dark:focus:ring-white/10"
                   placeholder="••••••••"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white/80 transition-colors"
                   tabIndex={-1}
                 >
                   {showConfirmPassword ? (
@@ -264,15 +277,18 @@ export default function ResetPasswordPage() {
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-                <p className="text-xs text-red-400">{error}</p>
+              <div className="rounded-xl bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 px-3 py-2 flex items-center gap-2">
+                <svg className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-rose-500 dark:text-rose-400">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#06b6d4] via-[#3b82f6] to-[#6366f1] px-3 py-2.5 text-sm font-medium text-white shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full h-10 inline-flex items-center justify-center rounded-xl bg-black text-white dark:bg-white dark:text-black text-sm font-semibold transition-colors hover:bg-black/90 dark:hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Updating..." : "Update password"}
             </button>

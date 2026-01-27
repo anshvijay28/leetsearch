@@ -76,7 +76,14 @@ export default function LoginRequiredModal({
             >
               Cancel
             </button>
-            <Link href="/login" className="flex-1">
+            <Link
+              href="/login"
+              className="flex-1"
+              onClick={() => {
+                // Ensure the modal closes immediately when navigating to login
+                onClose();
+              }}
+            >
               <button className="w-full h-9 inline-flex items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black text-sm font-semibold transition-colors hover:bg-black/90 dark:hover:bg-white/90 cursor-pointer">
                 Sign in
               </button>

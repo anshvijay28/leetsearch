@@ -253,10 +253,22 @@ async def fuzzy_search_problems(query: str, limit: int = 20) -> list[Dict[str, A
         escaped_query = re.escape(query.strip())
         # Use regex for substring matching (case-insensitive)
         regex_pattern = {"$regex": escaped_query, "$options": "i"}
+        
+        # Fetch more results before ranking to ensure we have candidates for ranking
+        # Short queries (1-2 chars) match many titles, so fetch more to find good matches
+        # Longer queries are more specific, so we can fetch fewer
+        query_length = len(query.strip())
+        if query_length <= 2:
+            fetch_limit = limit * 10  # Fetch 10x for very short queries like "X"
+        elif query_length <= 5:
+            fetch_limit = limit * 5   # Fetch 5x for short queries
+        else:
+            fetch_limit = limit * 2   # Fetch 2x for longer queries
+        
         cursor = metadata_collection.find(
             {"title": regex_pattern},
             {"_id": 0, "qid": 1, "title": 1, "difficulty": 1, "topics": 1, "is_premium_question": 1}
-        ).limit(limit).sort("qid", 1)  # Sort by qid for consistent base order
+        ).limit(fetch_limit).sort("qid", 1)  # Sort by qid for consistent base order
     
     # Build results list
     results: list[Dict[str, Any]] = []
@@ -298,7 +310,8 @@ async def fuzzy_search_problems(query: str, limit: int = 20) -> list[Dict[str, A
         # Combine in priority order
         results = exact_matches + prefix_matches + other_matches
 
-    return results
+    # Limit to the requested amount after ranking
+    return results[:limit]
 
 
 async def get_problem_metadata(qids: List[int]) -> Dict[int, Dict[str, Any]]:
