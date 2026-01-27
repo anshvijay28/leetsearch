@@ -135,12 +135,12 @@ export default function Home() {
   };
 
   return (
-    <div className="h-[calc(100vh-72px)] overflow-hidden flex flex-col relative">
-      <div className="flex-1 flex flex-col">
-        <div className="relative z-10 flex flex-col h-full min-h-0">
-          <main className="flex-1 min-h-0 flex flex-col items-center px-4 py-6 md:py-10 relative z-10">
-            <div className={`w-full max-w-6xl mx-auto flex flex-col gap-8 h-full ${results.length === 0 && !isLoading ? 'justify-center' : ''}`}>
-              <div className={`w-full max-w-3xl mx-auto flex flex-col ${results.length === 0 && !isLoading ? '' : 'h-full min-h-0'}`}>
+    <div className="flex flex-col relative">
+      <div className="flex flex-col">
+        <div className="relative z-10 flex flex-col">
+          <main className="flex flex-col items-center px-4 py-6 md:py-10 relative z-10">
+            <div className={`w-full max-w-6xl mx-auto flex flex-col gap-8 ${results.length === 0 && !isLoading ? 'justify-center min-h-[calc(100vh-72px)]' : ''}`}>
+              <div className="w-full max-w-3xl mx-auto flex flex-col">
                 {results.length === 0 && !isLoading && (
                   <motion.div
                     className="flex-shrink-0 mb-6 text-center"
@@ -178,7 +178,7 @@ export default function Home() {
                   />
                 </div>
                 {results.length > 0 || isLoading ? (
-                  <div className="flex-1 min-h-0">
+                  <div>
                     <ResultsList
                       results={results}
                       isLoading={isLoading}

@@ -76,9 +76,9 @@ export default function ResultsList({
   }
 
   return (
-    <div className="flex flex-col h-screen min-h-0">
+    <div className="flex flex-col">
       <motion.div
-        className="flex items-center justify-between mb-6 flex-shrink-0"
+        className="flex items-center justify-between mb-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -92,32 +92,30 @@ export default function ResultsList({
         </div>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
-        <div className="grid grid-cols-1 gap-3 pb-24">
-          {deduplicatedResults.map((q, index) => {
-            const hasPersistentHover = false;
+      <div className="grid grid-cols-1 gap-3 pb-24">
+        {deduplicatedResults.map((q, index) => {
+          const hasPersistentHover = false;
 
-            return (
-              <motion.div
-                key={q.qid}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30,
-                  delay: index * 0.05,
-                  mass: 0.8,
-                }}
-              >
-                <QuestionCard
-                  question={q}
-                  hasPersistentHover={hasPersistentHover}
-                />
-              </motion.div>
-            );
-          })}
-        </div>
+          return (
+            <motion.div
+              key={q.qid}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                delay: index * 0.05,
+                mass: 0.8,
+              }}
+            >
+              <QuestionCard
+                question={q}
+                hasPersistentHover={hasPersistentHover}
+              />
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
