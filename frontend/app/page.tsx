@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Question } from "./types";
@@ -46,11 +46,12 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     difficulty: [],
     excludePremium: false,
     includeTags: [],
+    excludeSQL: false,
+    excludeJSTS: false,
   });
 
   useEffect(() => {
@@ -58,7 +59,14 @@ export default function Home() {
     if (persisted) {
       setQuery(persisted.query);
       setResults(persisted.results);
-      setFilters(persisted.filters);
+      // Ensure all filter fields are defined (handle migration from old persisted state)
+      setFilters({
+        difficulty: persisted.filters.difficulty || [],
+        excludePremium: persisted.filters.excludePremium ?? false,
+        includeTags: persisted.filters.includeTags || [],
+        excludeSQL: persisted.filters.excludeSQL ?? false,
+        excludeJSTS: persisted.filters.excludeJSTS ?? false,
+      });
     }
     setIsHydrated(true);
   }, []);
@@ -97,6 +105,14 @@ export default function Home() {
         params.include_tags = filters.includeTags;
       }
 
+      if (filters.excludeSQL) {
+        params.exclude_sql = true;
+      }
+
+      if (filters.excludeJSTS) {
+        params.exclude_js_ts = true;
+      }
+
       // Print filter params to console
       console.log("Filter Parameters:", params);
 
@@ -126,6 +142,8 @@ export default function Home() {
     if (filters.difficulty.length > 0) count++;
     if (filters.excludePremium) count++;
     if (filters.includeTags.length > 0) count++;
+    if (filters.excludeSQL) count++;
+    if (filters.excludeJSTS) count++;
     return count;
   };
 
@@ -169,7 +187,6 @@ export default function Home() {
                     isLoading={isLoading}
                     onFilterClick={() => setShowFilterModal(true)}
                     filterActiveCount={getActiveFilterCount()}
-                    filterButtonRef={filterButtonRef}
                     onClear={() => {
                       setResults([]);
                       setQuery("");
@@ -200,7 +217,6 @@ export default function Home() {
             filters={filters}
             onFiltersChange={setFilters}
             onClose={() => setShowFilterModal(false)}
-            filterButtonRef={filterButtonRef}
           />
         </div>
       </div>

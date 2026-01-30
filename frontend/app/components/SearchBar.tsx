@@ -13,7 +13,6 @@ type SearchBarProps = {
   isLoading?: boolean;
   onFilterClick?: () => void;
   filterActiveCount?: number;
-  filterButtonRef?: React.RefObject<HTMLButtonElement | null>;
   onClear?: () => void;
   hasResults?: boolean;
 };
@@ -26,7 +25,6 @@ export default function SearchBar({
   isLoading = false,
   onFilterClick,
   filterActiveCount = 0,
-  filterButtonRef,
   onClear,
   hasResults = false,
 }: SearchBarProps) {
@@ -119,7 +117,6 @@ export default function SearchBar({
             <div className="flex items-center gap-3">
               {onFilterClick && (
                 <button
-                  ref={filterButtonRef}
                   type="button"
                   onClick={onFilterClick}
                   className={cn(

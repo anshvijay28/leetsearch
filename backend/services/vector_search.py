@@ -19,7 +19,9 @@ async def get_query_results(
     query: str,
     difficulty: Optional[List[str]] = None,
     exclude_premium: Optional[bool] = None,
-    include_tags: Optional[List[str]] = None
+    include_tags: Optional[List[str]] = None,
+    exclude_sql: Optional[bool] = None,
+    exclude_js_ts: Optional[bool] = None
 ) -> List[Dict[str, Any]]:
     """
     Get vector search results for a query string with optional filters.
@@ -32,6 +34,8 @@ async def get_query_results(
         difficulty: Optional list of difficulties to filter by (Easy, Medium, Hard)
         exclude_premium: Optional flag to exclude premium problems
         include_tags: Optional list of tags - only show questions with at least one of these tags
+        exclude_sql: Optional flag to exclude SQL-only questions
+        exclude_js_ts: Optional flag to exclude JavaScript/TypeScript-only questions
     
     Returns:
         List of matching documents with qid, title, difficulty, and tags
@@ -60,6 +64,14 @@ async def get_query_results(
         if include_tags and len(include_tags) > 0:
             filter_conditions["topics"] = {"$in": include_tags}
         
+        # SQL filter
+        if exclude_sql:
+            filter_conditions["SQL"] = False
+        
+        # JS/TS filter
+        if exclude_js_ts:
+            filter_conditions["JS"] = False
+        
         # Access database and collections
         db = await get_database()
         embeddings_collection = db[EMBEDDINGS_COLLECTION]
@@ -85,7 +97,7 @@ async def get_query_results(
             },
             {
                 "$project": {
-                    "_id": 0,
+                    "chunk_id": 1,
                     "qid": 1,
                     "score": {"$meta": "vectorSearchScore"}
                 }
@@ -101,12 +113,18 @@ async def get_query_results(
             # Collect unique qids (keep first occurrence which has highest score)
             async for doc in cursor:
                 qid = doc.get("qid")
+                chunk_id = doc.get("chunk_id")
+                score = doc.get("score", 0.0)
+                
                 if qid and qid not in seen_qids:
                     seen_qids.add(qid)
                     vector_results.append({
                         "qid": qid,
-                        "score": doc.get("score", 0.0)
+                        "score": score
                     })
+                    
+                    # Print which chunk matched for this question
+                    print(f"Question {qid} matched with chunk_id={chunk_id}, score={score:.4f}")
             
             if not seen_qids:
                 return []

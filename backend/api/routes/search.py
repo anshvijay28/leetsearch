@@ -20,7 +20,9 @@ async def search_questions(
     query: str = Query(..., min_length=1, max_length=500, description="Search query (1-500 characters)"),
     difficulty: Optional[List[DifficultyType]] = Query(None, description="Filter by difficulty (Easy, Medium, Hard)"),
     exclude_premium: Optional[bool] = Query(None, description="Exclude premium problems"),
-    include_tags: Optional[List[str]] = Query(None, max_length=50, description="Include only questions with these tags")
+    include_tags: Optional[List[str]] = Query(None, max_length=50, description="Include only questions with these tags"),
+    exclude_sql: Optional[bool] = Query(None, description="Exclude SQL-only questions"),
+    exclude_js_ts: Optional[bool] = Query(None, description="Exclude JavaScript/TypeScript-only questions")
 ):
     """
     Search for LeetCode questions using vector search with optional filters.
@@ -30,6 +32,8 @@ async def search_questions(
         difficulty: Optional list of difficulties to filter by (Easy, Medium, Hard)
         exclude_premium: Optional flag to exclude premium problems
         include_tags: Optional list of tags - only show questions with at least one of these tags
+        exclude_sql: Optional flag to exclude SQL-only questions
+        exclude_js_ts: Optional flag to exclude JavaScript/TypeScript-only questions
     
     Returns:
         List of matching questions with qid, title, difficulty, and tags
@@ -45,7 +49,9 @@ async def search_questions(
             trimmed_query,
             difficulty=difficulty,
             exclude_premium=exclude_premium,
-            include_tags=include_tags
+            include_tags=include_tags,
+            exclude_sql=exclude_sql,
+            exclude_js_ts=exclude_js_ts
         )
         
         # Re-rank results using semantic understanding
